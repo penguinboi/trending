@@ -677,12 +677,12 @@ function redrawCardWarning(graphics, width, height, radius, color) {
 function generatePost() {
     // Reaction types with stability effects and fake news likelihood
     const reactions = [
-        { reaction: 'love', emoji: '❤️', stability: 8, fakeChance: 0.05, weight: 10 },
-        { reaction: 'haha', emoji: '😂', stability: 4, fakeChance: 0.15, weight: 15 },
+        { reaction: 'love', emoji: '❤️', stability: 2, fakeChance: 0.05, weight: 10 },
+        { reaction: 'haha', emoji: '😂', stability: 1, fakeChance: 0.15, weight: 15 },
         { reaction: 'like', emoji: '👍', stability: 0, fakeChance: 0.10, weight: 25 },
         { reaction: 'wow', emoji: '😮', stability: 0, fakeChance: 0.25, weight: 20 },
-        { reaction: 'sad', emoji: '😢', stability: -5, fakeChance: 0.20, weight: 15 },
-        { reaction: 'angry', emoji: '😡', stability: -12, fakeChance: 0.40, weight: 15 }
+        { reaction: 'sad', emoji: '😢', stability: -1, fakeChance: 0.20, weight: 15 },
+        { reaction: 'angry', emoji: '😡', stability: -3, fakeChance: 0.40, weight: 15 }
     ];
 
     // Weighted random selection for reaction type
@@ -707,7 +707,7 @@ function generatePost() {
     const engagement = baseEngagement + Math.floor(Math.random() * 20) - 5;
 
     // Add variance to stability
-    const stabilityVariance = Math.floor(Math.random() * 4) - 2;
+    const stabilityVariance = Math.floor(Math.random() * 3) - 1;
     const stability = selected.stability + stabilityVariance;
 
     // Determine if this post is fake news
@@ -784,11 +784,11 @@ function handleAction(action) {
         case 'suppress':
             if (!post.isFakeNews) {
                 // Suppressing real content causes backlash
-                stability -= 10;
+                stability -= 3;
                 flashCard(container, 0xff4444);
             } else {
                 // Suppressing fake news is good
-                stability += 5;
+                stability += 1;
                 flashCard(container, 0x00ff88);
             }
             pair.resolved = true;
