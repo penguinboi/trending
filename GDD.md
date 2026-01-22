@@ -56,11 +56,15 @@ One decision cycle every \~10 seconds.
 
 * Posts always arrive in pairs covering the same topic
 
-* Each option shows expected engagement and instability tiers
+* Each post displays two visible metrics:
+  * **Engagement value** - How much the post will grow the platform
+  * **Reaction type** - Facebook-style emoji (👍 Like, ❤️ Love, 😂 Haha, 😮 Wow, 😢 Sad, 😡 Angry)
 
-* Expected values are imperfect and sometimes misleading
+* Hidden metrics the player cannot see without verification:
+  * **Stability impact** - Derived from reaction type
+  * **Fake news likelihood** - Probability the post is misinformation
 
-* If the player does not intervene, the algorithm boosts the option with higher expected engagement
+* If the player does not intervene, the algorithm boosts the option with higher engagement
 
 * Credibility and long-term impact are ignored by default
 
@@ -116,45 +120,46 @@ Oversight failure is systemic, not player error.
 
 ### **Verification System**
 
-* Verifying a post takes time and blocks other actions
+* Verifying a post takes real time (~2 seconds) while the post continues moving
 
-* Verification resolves validity based on probability, not certainty
+* During verification, the player cannot verify other posts
 
-* Low-credibility posts may occasionally be valid; credible posts may still fail
+* Verification reveals whether the post is fake news or legitimate
 
-* Verification results are permanent
+* Verification results are permanent and displayed on the card
 
-During certain policy windows, verification is disabled entirely.
+* When posts are arriving quickly, there isn't enough time to verify everything
+
+The player must decide: verify to make informed decisions, or act quickly on instinct?
 
 ---
 
 ### **Suppression Backlash**
 
-* Suppressing invalid content is stabilizing
+* Suppressing fake news is stabilizing (+5 stability)
 
-* Suppressing valid content causes backlash
+* Suppressing legitimate content causes backlash (-10 stability)
 
-* Backlash reduces Social Stability and increases unrest
+* Backlash represents public distrust of platform censorship
 
-* Repeated suppression of valid posts compounds penalties
+* Without verification, suppression is a gamble
 
-Players cannot censor their way to stability.
+Players cannot censor their way to stability—guessing wrong makes things worse.
 
 ---
 
-### **Content Types**
+### **Reaction Types**
 
-* Neutral – Low engagement, stabilizing
+Posts are categorized by the dominant user reaction they provoke. Reaction type determines hidden stability impact:
 
-* Positive – Medium engagement, slight stability gain
+* ❤️ Love – Most stabilizing (+8), low fake news chance (5%)
+* 😂 Haha – Stabilizing (+4), low fake news chance (15%)
+* 👍 Like – Neutral (0), low fake news chance (10%)
+* 😮 Wow – Neutral (0), moderate fake news chance (25%)
+* 😢 Sad – Destabilizing (-5), moderate fake news chance (20%)
+* 😡 Angry – Most destabilizing (-12), high fake news chance (40%)
 
-* Viral Neutral – High engagement, little or no instability, rare
-
-* Controversial – High engagement, gradual instability
-
-* Fake News / Clickbait – Very high engagement spikes, heavy instability, increases future risk
-
-* Suppressed – No engagement; effects depend on validity
+Engagement varies independently—angry posts tend to have high engagement but damage stability.
 
 All content is fictional and abstracted.
 
@@ -195,9 +200,12 @@ Win if:
 * Rounded post cards with drop shadows and 3D highlight effects
 
 * Emojis throughout UI for playful tone:
-  * Content types: 📰 Neutral, ✨ Positive, 🔥 Viral, ⚡ Controversial, 🚨 Fake News
+  * Reactions: 👍 Like, ❤️ Love, 😂 Haha, 😮 Wow, 😢 Sad, 😡 Angry
   * UI elements: 📈 Engagement, ⚖️ Stability, 🎯 Phase, ⏱️ Time
   * 🤖 indicator shows algorithm's automatic choice
+  * Verification status: ⏳ verifying, ✅ verified real, 🚨 fake news
+
+* Card colors match reaction type (blue=like, pink=love, yellow=haha, etc.)
 
 * Purple-toned text for readability on light background
 

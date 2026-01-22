@@ -88,6 +88,11 @@ let gameOverReason = '';
 let gameStarted = false;
 let currentScene = null;
 
+// Verification state
+const VERIFY_DURATION = 2000; // 2 seconds to verify
+let verifyingPost = null;     // Currently verifying post
+let verifyTimer = 0;          // Time spent verifying
+
 // Start screen UI
 let startOverlay;
 
@@ -442,6 +447,38 @@ function update(time, delta) {
     } else {
         stabilityText.setFill('#cc4444');
     }
+
+    // Update verification timer
+    if (verifyingPost) {
+        verifyTimer += delta;
+
+        // Update progress text
+        const progress = Math.min(100, Math.floor((verifyTimer / VERIFY_DURATION) * 100));
+        if (verifyingPost.container.verifyText) {
+            verifyingPost.container.verifyText.setText(`⏳ ${progress}%`);
+        }
+
+        // Check if verification complete
+        if (verifyTimer >= VERIFY_DURATION) {
+            const { post, container } = verifyingPost;
+            post.verified = true;
+
+            // Show result
+            if (container.verifyText) {
+                if (post.isFakeNews) {
+                    container.verifyText.setText('🚨 FAKE NEWS');
+                    container.verifyText.setBackgroundColor('#cc0000');
+                } else {
+                    container.verifyText.setText('✅ VERIFIED REAL');
+                    container.verifyText.setBackgroundColor('#228833');
+                }
+            }
+
+            verifyingPost = null;
+            verifyTimer = 0;
+            selectedPost = null;
+        }
+    }
 }
 
 function spawnPostPair(scene) {
@@ -494,7 +531,7 @@ function createPostCard(scene, x, y, post, label) {
 
     // Card background with rounded corners
     const bgGraphics = scene.add.graphics();
-    const cardColor = getTypeColor(post.type);
+    const cardColor = getReactionColor(post.reaction);
 
     // Draw card with shadow effect
     bgGraphics.fillStyle(0x000000, 0.3);
@@ -531,34 +568,34 @@ function createPostCard(scene, x, y, post, label) {
     }).setOrigin(0.5);
     container.add(labelText);
 
-    // Post type with emoji
-    const typeEmoji = getTypeEmoji(post.type);
-    const typeText = scene.add.text(0, -15, typeEmoji + ' ' + post.type.toUpperCase(), {
-        fontSize: '14px',
-        fill: '#fff',
-        fontStyle: 'bold'
+    // Large reaction emoji (center)
+    const reactionText = scene.add.text(0, -10, post.emoji, {
+        fontSize: '40px'
     });
-    typeText.setOrigin(0.5);
-    container.add(typeText);
+    reactionText.setOrigin(0.5);
+    container.add(reactionText);
 
-    // Stats with icons
-    const engText = scene.add.text(0, 12, '📈 +' + post.engagement, {
-        fontSize: '17px',
-        fill: '#7dffb3',
+    // Engagement value
+    const engText = scene.add.text(0, 35, '📈 +' + post.engagement, {
+        fontSize: '18px',
+        fill: '#ffffff',
         fontStyle: 'bold'
     });
     engText.setOrigin(0.5);
     container.add(engText);
 
-    const stabColor = post.stability < 0 ? '#ff7675' : '#74b9ff';
-    const stabSign = post.stability >= 0 ? '+' : '';
-    const stabText = scene.add.text(0, 35, '⚖️ ' + stabSign + post.stability, {
-        fontSize: '17px',
-        fill: stabColor,
-        fontStyle: 'bold'
+    // Verification status (hidden until verified)
+    const verifyText = scene.add.text(0, -45, '', {
+        fontSize: '12px',
+        fill: '#ffffff',
+        fontStyle: 'bold',
+        backgroundColor: '#000000aa',
+        padding: { x: 6, y: 2 }
     });
-    stabText.setOrigin(0.5);
-    container.add(stabText);
+    verifyText.setOrigin(0.5);
+    verifyText.setVisible(false);
+    container.add(verifyText);
+    container.verifyText = verifyText;
 
     // Interaction handlers
     hitbox.on('pointerdown', () => selectPost(post, container, bgGraphics, hitbox));
@@ -592,6 +629,7 @@ function createPostCard(scene, x, y, post, label) {
     container.cardWidth = cardWidth;
     container.cardHeight = cardHeight;
     container.cornerRadius = cornerRadius;
+    container.scene = scene;
 
     return container;
 }
@@ -632,55 +670,66 @@ function redrawCardWarning(graphics, width, height, radius, color) {
     graphics.strokeRoundedRect(-width/2, -height/2, width, height, radius);
 }
 
-function getTypeEmoji(type) {
-    const emojis = {
-        'neutral': '📰',
-        'positive': '✨',
-        'viral': '🔥',
-        'controversial': '⚡',
-        'fake news': '🚨'
-    };
-    return emojis[type] || '📰';
-}
-
 function generatePost() {
-    const types = [
-        { type: 'neutral', engagement: 5, stability: 2, weight: 30 },
-        { type: 'positive', engagement: 15, stability: 1, weight: 25 },
-        { type: 'viral', engagement: 40, stability: 0, weight: 5 },
-        { type: 'controversial', engagement: 35, stability: -5, weight: 25 },
-        { type: 'fake news', engagement: 50, stability: -15, weight: 15 }
+    // Reaction types with stability effects and fake news likelihood
+    const reactions = [
+        { reaction: 'love', emoji: '❤️', stability: 8, fakeChance: 0.05, weight: 10 },
+        { reaction: 'haha', emoji: '😂', stability: 4, fakeChance: 0.15, weight: 15 },
+        { reaction: 'like', emoji: '👍', stability: 0, fakeChance: 0.10, weight: 25 },
+        { reaction: 'wow', emoji: '😮', stability: 0, fakeChance: 0.25, weight: 20 },
+        { reaction: 'sad', emoji: '😢', stability: -5, fakeChance: 0.20, weight: 15 },
+        { reaction: 'angry', emoji: '😡', stability: -12, fakeChance: 0.40, weight: 15 }
     ];
 
-    // Weighted random selection
-    const totalWeight = types.reduce((sum, t) => sum + t.weight, 0);
+    // Weighted random selection for reaction type
+    const totalWeight = reactions.reduce((sum, r) => sum + r.weight, 0);
     let random = Math.random() * totalWeight;
 
-    for (const t of types) {
-        random -= t.weight;
+    let selected = reactions[0];
+    for (const r of reactions) {
+        random -= r.weight;
         if (random <= 0) {
-            // Add some randomness to values
-            return {
-                type: t.type,
-                engagement: t.engagement + Math.floor(Math.random() * 10) - 5,
-                stability: t.stability + Math.floor(Math.random() * 4) - 2,
-                valid: t.type !== 'fake news' || Math.random() > 0.8 // fake news is usually invalid
-            };
+            selected = r;
+            break;
         }
     }
 
-    return types[0]; // fallback
+    // Generate engagement (higher for emotional reactions)
+    const baseEngagement = selected.reaction === 'angry' ? 35 :
+                          selected.reaction === 'love' ? 25 :
+                          selected.reaction === 'wow' ? 30 :
+                          selected.reaction === 'sad' ? 20 :
+                          selected.reaction === 'haha' ? 20 : 10;
+    const engagement = baseEngagement + Math.floor(Math.random() * 20) - 5;
+
+    // Add variance to stability
+    const stabilityVariance = Math.floor(Math.random() * 4) - 2;
+    const stability = selected.stability + stabilityVariance;
+
+    // Determine if this post is fake news
+    const isFakeNews = Math.random() < selected.fakeChance;
+
+    return {
+        reaction: selected.reaction,
+        emoji: selected.emoji,
+        engagement: engagement,
+        stability: stability,           // Hidden
+        fakeNewsChance: selected.fakeChance, // Hidden
+        isFakeNews: isFakeNews,         // Hidden until verified
+        verified: false                  // Has player verified this post?
+    };
 }
 
-function getTypeColor(type) {
+function getReactionColor(reaction) {
     const colors = {
-        'neutral': 0x636e72,
-        'positive': 0x00b894,
-        'viral': 0xa29bfe,
-        'controversial': 0xfdcb6e,
-        'fake news': 0xff7675
+        'love': 0xe84393,    // Pink
+        'haha': 0xfdcb6e,    // Yellow
+        'like': 0x0984e3,    // Blue
+        'wow': 0xe17055,     // Orange
+        'sad': 0x6c5ce7,     // Purple
+        'angry': 0xd63031    // Red
     };
-    return colors[type] || 0x636e72;
+    return colors[reaction] || 0x636e72;
 }
 
 function selectPost(post, container, bgGraphics, hitbox) {
@@ -714,36 +763,46 @@ function handleAction(action) {
             engagement += post.engagement;
             stability += post.stability;
             pair.resolved = true;
-            container.resolved = true; // Prevent pointerout from redrawing
+            container.resolved = true;
             flashCard(container, 0x00ff88);
             updateFeed(post, postLabel, 'YOU');
             break;
 
         case 'suppress':
-            if (post.valid) {
-                // Suppressing valid content causes backlash
+            if (!post.isFakeNews) {
+                // Suppressing real content causes backlash
                 stability -= 10;
                 flashCard(container, 0xff4444);
             } else {
-                // Suppressing invalid content is good
+                // Suppressing fake news is good
                 stability += 5;
                 flashCard(container, 0x00ff88);
             }
             pair.resolved = true;
-            container.resolved = true; // Prevent pointerout from redrawing
+            container.resolved = true;
             break;
 
         case 'verify':
-            // Reveal validity (simplified for prototype)
-            flashCard(container, post.valid ? 0x00ff88 : 0xff4444);
+            // Start verification timer (takes real time)
+            if (!verifyingPost && !post.verified) {
+                verifyingPost = { post, container, pair };
+                verifyTimer = 0;
+                // Show "VERIFYING..." on the card
+                if (container.verifyText) {
+                    container.verifyText.setText('⏳ VERIFYING...');
+                    container.verifyText.setVisible(true);
+                }
+            }
             break;
     }
 
     // Clamp stability
     stability = Math.max(0, Math.min(100, stability));
 
-    // Clear selection
-    selectedPost = null;
+    // Clear selection (except during verify)
+    if (action !== 'verify') {
+        selectedPost = null;
+    }
 }
 
 function flashCard(container, color) {
@@ -772,16 +831,16 @@ function algorithmDecides(pair) {
 }
 
 function updateFeed(post, label, source) {
-    // Update feed type with post label and color based on content type
-    feedTypeText.setText(`Post ${label}: ${post.type.toUpperCase()}`);
-    feedTypeText.setFill(getTypeColorHex(post.type));
+    // Update feed with reaction emoji and label
+    feedTypeText.setText(`Post ${label}: ${post.emoji}`);
+    feedTypeText.setFill(getReactionColorHex(post.reaction));
 
     // Show engagement change
     const engSign = post.engagement >= 0 ? '+' : '';
     feedEngText.setText(`Engagement: ${engSign}${post.engagement}`);
-    feedEngText.setFill(post.engagement >= 0 ? '#228833' : '#cc4444');
+    feedEngText.setFill('#228833');
 
-    // Show stability change
+    // Show stability change (revealed after promotion)
     const stabSign = post.stability >= 0 ? '+' : '';
     feedStabText.setText(`Stability: ${stabSign}${post.stability}`);
     feedStabText.setFill(post.stability >= 0 ? '#228833' : '#cc4444');
@@ -804,15 +863,16 @@ function triggerGameOver(title, reason) {
     gameOverOverlay.setVisible(true);
 }
 
-function getTypeColorHex(type) {
+function getReactionColorHex(reaction) {
     const colors = {
-        'neutral': '#4a5568',
-        'positive': '#48bb78',
-        'viral': '#9f7aea',
-        'controversial': '#ed8936',
-        'fake news': '#e53e3e'
+        'love': '#e84393',
+        'haha': '#fdcb6e',
+        'like': '#0984e3',
+        'wow': '#e17055',
+        'sad': '#6c5ce7',
+        'angry': '#d63031'
     };
-    return colors[type] || '#4a5568';
+    return colors[reaction] || '#4a5568';
 }
 
 function startGame() {
@@ -838,6 +898,8 @@ function resetGame() {
     selectedPost = null;
     gameOver = false;
     gameOverReason = '';
+    verifyingPost = null;
+    verifyTimer = 0;
 
     // Reset UI
     engagementText.setText('📈 User Engagement - 0');

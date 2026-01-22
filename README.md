@@ -1,4 +1,4 @@
-# 📱 TRENDING 📱
+# 🔥 TRENDING 🔥
 
 *The world sees what you choose to show.*
 
@@ -8,26 +8,29 @@ A content moderation simulation game for **Pirate Software Game Jam 18**.
 
 **Theme:** "The World is Watching"
 
-You are a Content Moderator at TrendNet, a major social media platform. An AI algorithm runs the feed, always promoting whatever drives the most engagement - even if it destabilizes society. You're the human in the loop. Can you survive your 10-minute shift without society collapsing?
+You are a Content Moderator at *Wildfire Social*, a major social media platform. An AI algorithm runs the feed, always promoting whatever drives the most engagement - even if it destabilizes society. You're the human in the loop. Can you survive your 10-minute shift without society collapsing?
 
 ## 🕹️ How to Play
 
 - **Click** a post card to select it
-- **[P] Promote** - Push content to the feed (applies engagement/stability effects)
-- **[S] Suppress** - Remove content (backlash if it was valid)
-- **[V] Verify** - Check if content is real or fake news
+- **[P] Promote** - Push content to the feed
+- **[S] Suppress** - Remove content (backlash if it wasn't fake news!)
+- **[V] Verify** - Check if content is real or fake (takes time!)
 
 If you don't act, the algorithm decides for you - and it always chooses maximum engagement.
 
-## 📊 Content Types
+## 📊 Reaction Types
 
-| Type | Emoji | Engagement | Stability |
-|------|-------|------------|-----------|
-| Neutral | 📰 | Low | Stabilizing |
-| Positive | ✨ | Medium | Slight gain |
-| Viral | 🔥 | High | Neutral |
-| Controversial | ⚡ | High | Destabilizing |
-| Fake News | 🚨 | Very High | Heavy damage |
+Posts show their **engagement value** (visible) and **reaction type** (visible). Stability impact is hidden!
+
+| Reaction | Emoji | Stability | Fake News Risk |
+|----------|-------|-----------|----------------|
+| Love | ❤️ | Most stabilizing | Very low (5%) |
+| Haha | 😂 | Stabilizing | Low (15%) |
+| Like | 👍 | Neutral | Low (10%) |
+| Wow | 😮 | Neutral | Moderate (25%) |
+| Sad | 😢 | Destabilizing | Moderate (20%) |
+| Angry | 😡 | Most destabilizing | High (40%) |
 
 ## 🏆 Win/Lose Conditions
 
