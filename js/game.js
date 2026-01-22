@@ -156,20 +156,16 @@ function create() {
     }
 
     // UI: Engagement meter (depth 100 keeps UI above posts)
-    this.add.text(20, 20, '📈 User Engagement', { fontSize: '15px', fill: '#6a5a8a' }).setDepth(100);
-    engagementText = this.add.text(20, 40, '0', { fontSize: '31px', fill: '#00aa66' }).setDepth(100);
+    engagementText = this.add.text(20, 20, '📈 User Engagement - 0', { fontSize: '22px', fill: '#00aa66' }).setDepth(100);
 
     // UI: Stability meter
-    this.add.text(20, 75, '⚖️ Global Stability', { fontSize: '15px', fill: '#6a5a8a' }).setDepth(100);
-    stabilityText = this.add.text(20, 95, '100%', { fontSize: '26px', fill: '#cc8800' }).setDepth(100);
+    stabilityText = this.add.text(20, 50, '⚖️ Global Stability - 100%', { fontSize: '22px', fill: '#228833' }).setDepth(100);
 
     // UI: Phase indicator
-    this.add.text(20, 130, '🎯 Phase', { fontSize: '15px', fill: '#6a5a8a' }).setDepth(100);
-    phaseText = this.add.text(20, 150, '1 / 10', { fontSize: '26px', fill: '#8866cc' }).setDepth(100);
+    phaseText = this.add.text(20, 80, '🎯 Phase - 1 / 10', { fontSize: '22px', fill: '#8866cc' }).setDepth(100);
 
     // UI: Timer
-    this.add.text(20, 185, '⏱️ Time Left', { fontSize: '15px', fill: '#6a5a8a' }).setDepth(100);
-    timerText = this.add.text(20, 205, '10:00', { fontSize: '26px', fill: '#5a3d7a' }).setDepth(100);
+    timerText = this.add.text(20, 110, '⏱️ Time Left - 10:00', { fontSize: '22px', fill: '#5a3d7a' }).setDepth(100);
 
     // UI: Feed display (shows last promoted content and effects)
     this.add.text(640, 570, '📣 PROMOTED TO FEED 📣', { fontSize: '13px', fill: '#7a6a9a' }).setOrigin(0.5).setDepth(100);
@@ -194,7 +190,7 @@ function create() {
     feedContainer.add(feedSourceText);
 
     // UI: Instructions
-    this.add.text(640, 680, '👆 Click a post to select it! [P] ✅ Promote | [S] 🚫 Suppress | [V] 🔍 Verify', {
+    this.add.text(640, 680, '👆 Click to select | [P] ✅ Promote | [S] 🚫 Suppress | [V] 🔍 Verify | 🤖 = Algorithm\'s pick', {
         fontSize: '15px',
         fill: '#7a6a9a',
         align: 'center'
@@ -428,23 +424,23 @@ function update(time, delta) {
     }
 
     // Update UI
-    engagementText.setText(Math.floor(engagement).toString());
-    stabilityText.setText(Math.floor(stability) + '%');
-    phaseText.setText((currentPhase + 1) + ' / 10');
+    engagementText.setText('📈 User Engagement - ' + Math.floor(engagement));
+    stabilityText.setText('⚖️ Global Stability - ' + Math.floor(stability) + '%');
+    phaseText.setText('🎯 Phase - ' + (currentPhase + 1) + ' / 10');
 
     // Update timer (countdown from 10:00)
     const remainingMs = Math.max(0, GAME_DURATION - gameTimer);
     const minutes = Math.floor(remainingMs / 60000);
     const seconds = Math.floor((remainingMs % 60000) / 1000);
-    timerText.setText(minutes + ':' + seconds.toString().padStart(2, '0'));
+    timerText.setText('⏱️ Time Left - ' + minutes + ':' + seconds.toString().padStart(2, '0'));
 
     // Color stability based on value
     if (stability > 66) {
-        stabilityText.setFill('#00ff88');
+        stabilityText.setFill('#228833');
     } else if (stability > 33) {
-        stabilityText.setFill('#ffaa00');
+        stabilityText.setFill('#cc8800');
     } else {
-        stabilityText.setFill('#ff4444');
+        stabilityText.setFill('#cc4444');
     }
 }
 
@@ -472,10 +468,7 @@ function spawnPostPair(scene) {
     // Algorithm choice indicator (shows which post the algorithm will pick)
     const algoChoice = postA.engagement >= postB.engagement ? cardA : cardB;
     const algoIndicator = scene.add.text(70, -40, '🤖', {
-        fontSize: '18px',
-        fill: '#ffffff',
-        backgroundColor: '#000000aa',
-        padding: { x: 4, y: 2 }
+        fontSize: '18px'
     });
     algoIndicator.setOrigin(0.5);
     algoChoice.add(algoIndicator);
@@ -847,11 +840,11 @@ function resetGame() {
     gameOverReason = '';
 
     // Reset UI
-    engagementText.setText('0');
-    stabilityText.setText('100%');
-    stabilityText.setFill('#00ff88');
-    phaseText.setText('1 / 10');
-    timerText.setText('10:00');
+    engagementText.setText('📈 User Engagement - 0');
+    stabilityText.setText('⚖️ Global Stability - 100%');
+    stabilityText.setFill('#228833');
+    phaseText.setText('🎯 Phase - 1 / 10');
+    timerText.setText('⏱️ Time Left - 10:00');
     feedTypeText.setText('—');
     feedTypeText.setFill('#888');
     feedEngText.setText('');
