@@ -124,14 +124,14 @@ function create() {
 
     // Game title
     this.add.text(640, 25, '📱 TRENDING 📱', {
-        fontSize: '48px',
+        fontSize: '53px',
         fill: '#5a3d7a',
         fontStyle: 'bold'
     }).setOrigin(0.5);
 
     // Tagline
     this.add.text(640, 60, '🌍 The world sees what you choose to show 👀', {
-        fontSize: '16px',
+        fontSize: '18px',
         fill: '#7a6a9a',
         fontStyle: 'italic'
     }).setOrigin(0.5);
@@ -142,7 +142,7 @@ function create() {
 
     // Decision zone label
     this.add.text(1100, 80, '⚠️ DECISION\nZONE ⚠️', {
-        fontSize: '16px',
+        fontSize: '18px',
         fill: '#7a6a9a',
         align: 'center'
     }).setOrigin(0.5);
@@ -156,45 +156,45 @@ function create() {
     }
 
     // UI: Engagement meter
-    this.add.text(20, 20, '📈 User Engagement', { fontSize: '14px', fill: '#6a5a8a' });
-    engagementText = this.add.text(20, 40, '0', { fontSize: '28px', fill: '#00aa66' });
+    this.add.text(20, 20, '📈 User Engagement', { fontSize: '15px', fill: '#6a5a8a' });
+    engagementText = this.add.text(20, 40, '0', { fontSize: '31px', fill: '#00aa66' });
 
     // UI: Stability meter
-    this.add.text(20, 70, '⚖️ Global Stability', { fontSize: '14px', fill: '#6a5a8a' });
-    stabilityText = this.add.text(20, 88, '100%', { fontSize: '24px', fill: '#cc8800' });
+    this.add.text(20, 75, '⚖️ Global Stability', { fontSize: '15px', fill: '#6a5a8a' });
+    stabilityText = this.add.text(20, 95, '100%', { fontSize: '26px', fill: '#cc8800' });
 
     // UI: Phase indicator
-    this.add.text(20, 120, '🎯 Phase', { fontSize: '14px', fill: '#6a5a8a' });
-    phaseText = this.add.text(20, 138, '1 / 10', { fontSize: '24px', fill: '#8866cc' });
+    this.add.text(20, 130, '🎯 Phase', { fontSize: '15px', fill: '#6a5a8a' });
+    phaseText = this.add.text(20, 150, '1 / 10', { fontSize: '26px', fill: '#8866cc' });
 
     // UI: Timer
-    this.add.text(20, 170, '⏱️ Time Left', { fontSize: '14px', fill: '#6a5a8a' });
-    timerText = this.add.text(20, 188, '10:00', { fontSize: '24px', fill: '#5a3d7a' });
+    this.add.text(20, 185, '⏱️ Time Left', { fontSize: '15px', fill: '#6a5a8a' });
+    timerText = this.add.text(20, 205, '10:00', { fontSize: '26px', fill: '#5a3d7a' });
 
     // UI: Feed display (shows last promoted content and effects)
-    this.add.text(640, 570, '📣 PROMOTED TO FEED 📣', { fontSize: '12px', fill: '#7a6a9a' }).setOrigin(0.5);
+    this.add.text(640, 570, '📣 PROMOTED TO FEED 📣', { fontSize: '13px', fill: '#7a6a9a' }).setOrigin(0.5);
 
     feedContainer = this.add.container(640, 610);
 
     feedTypeText = this.add.text(0, 0, '—', {
-        fontSize: '20px',
+        fontSize: '22px',
         fill: '#6a5a8a',
         fontStyle: 'bold'
     }).setOrigin(0.5);
     feedContainer.add(feedTypeText);
 
-    feedEngText = this.add.text(-120, 30, '', { fontSize: '16px', fill: '#00ff88' }).setOrigin(0.5);
+    feedEngText = this.add.text(-120, 30, '', { fontSize: '18px', fill: '#00ff88' }).setOrigin(0.5);
     feedContainer.add(feedEngText);
 
-    feedStabText = this.add.text(0, 30, '', { fontSize: '16px', fill: '#ffaa00' }).setOrigin(0.5);
+    feedStabText = this.add.text(0, 30, '', { fontSize: '18px', fill: '#ffaa00' }).setOrigin(0.5);
     feedContainer.add(feedStabText);
 
-    feedSourceText = this.add.text(120, 30, '', { fontSize: '14px', fill: '#666' }).setOrigin(0.5);
+    feedSourceText = this.add.text(120, 30, '', { fontSize: '15px', fill: '#666' }).setOrigin(0.5);
     feedContainer.add(feedSourceText);
 
     // UI: Instructions
     this.add.text(640, 680, '👆 Click a post to select it! [P] ✅ Promote | [S] 🚫 Suppress | [V] 🔍 Verify', {
-        fontSize: '14px',
+        fontSize: '15px',
         fill: '#7a6a9a',
         align: 'center'
     }).setOrigin(0.5);
@@ -213,20 +213,20 @@ function create() {
     gameOverOverlay.add(overlay);
 
     gameOverText = this.add.text(0, -80, '🎬 GAME OVER 🎬', {
-        fontSize: '64px',
+        fontSize: '70px',
         fill: '#ff4444',
         fontStyle: 'bold'
     }).setOrigin(0.5);
     gameOverOverlay.add(gameOverText);
 
     gameOverSubtext = this.add.text(0, 0, '', {
-        fontSize: '24px',
+        fontSize: '26px',
         fill: '#ffffff'
     }).setOrigin(0.5);
     gameOverOverlay.add(gameOverSubtext);
 
     finalStatsText = this.add.text(0, 80, '', {
-        fontSize: '20px',
+        fontSize: '22px',
         fill: '#888888',
         align: 'center'
     }).setOrigin(0.5);
@@ -254,7 +254,7 @@ function create() {
     gameOverOverlay.add(playAgainHitbox);
 
     playAgainButton = this.add.text(0, 160, '🔄 PLAY AGAIN 🎮', {
-        fontSize: '20px',
+        fontSize: '22px',
         fill: '#ffffff',
         fontStyle: 'bold'
     }).setOrigin(0.5);
@@ -268,7 +268,7 @@ function create() {
     startOverlay.add(startBg);
 
     const startTitle = this.add.text(0, -260, '📱 TRENDING 📱', {
-        fontSize: '72px',
+        fontSize: '79px',
         fill: '#5a3d7a',
         fontStyle: 'bold'
     }).setOrigin(0.5);
@@ -284,15 +284,15 @@ function create() {
         '📊 The board wants growth. Society needs stability.\n' +
         '⏱️ You have 10 minutes to prove you can balance both.\n\n' +
         '🌍 The world is watching. 👀', {
-        fontSize: '16px',
+        fontSize: '18px',
         fill: '#4a4a6a',
         align: 'center',
-        lineSpacing: 6
+        lineSpacing: 7
     }).setOrigin(0.5);
     startOverlay.add(introText);
 
-    const controlsText = this.add.text(0, 170, '🎮  [P] ✅ Promote  |  [S] 🚫 Suppress  |  [V] 🔍 Verify', {
-        fontSize: '14px',
+    const controlsText = this.add.text(0, 180, '🎮  [P] ✅ Promote  |  [S] 🚫 Suppress  |  [V] 🔍 Verify', {
+        fontSize: '15px',
         fill: '#6a5a8a',
         align: 'center'
     }).setOrigin(0.5);
@@ -325,8 +325,8 @@ function create() {
     startHitbox.on('pointerdown', () => startGame());
     startOverlay.add(startHitbox);
 
-    const startButtonText = this.add.text(0, 240, '🚀 BEGIN SHIFT', {
-        fontSize: '22px',
+    const startButtonText = this.add.text(0, 250, '🚀 BEGIN SHIFT', {
+        fontSize: '24px',
         fill: '#ffffff',
         fontStyle: 'bold'
     }).setOrigin(0.5);
@@ -428,14 +428,14 @@ function spawnPostPair(scene) {
     container.add(cardB);
 
     // VS divider
-    const vs = scene.add.text(0, 0, 'VS', { fontSize: '20px', fill: '#4a4a6a', fontStyle: 'bold' });
+    const vs = scene.add.text(0, 0, 'VS', { fontSize: '22px', fill: '#4a4a6a', fontStyle: 'bold' });
     vs.setOrigin(0.5);
     container.add(vs);
 
     // Algorithm choice indicator (shows which post the algorithm will pick)
     const algoChoice = postA.engagement >= postB.engagement ? cardA : cardB;
     const algoIndicator = scene.add.text(70, -40, '🤖', {
-        fontSize: '16px',
+        fontSize: '18px',
         fill: '#ffffff',
         backgroundColor: '#000000aa',
         padding: { x: 4, y: 2 }
@@ -495,7 +495,7 @@ function createPostCard(scene, x, y, post, label) {
     container.add(badgeGraphics);
 
     const labelText = scene.add.text(-cardWidth/2 + 38, -cardHeight/2 + 20, 'Post ' + label, {
-        fontSize: '12px',
+        fontSize: '13px',
         fill: '#fff',
         fontStyle: 'bold'
     }).setOrigin(0.5);
@@ -504,7 +504,7 @@ function createPostCard(scene, x, y, post, label) {
     // Post type with emoji
     const typeEmoji = getTypeEmoji(post.type);
     const typeText = scene.add.text(0, -15, typeEmoji + ' ' + post.type.toUpperCase(), {
-        fontSize: '13px',
+        fontSize: '14px',
         fill: '#fff',
         fontStyle: 'bold'
     });
@@ -513,7 +513,7 @@ function createPostCard(scene, x, y, post, label) {
 
     // Stats with icons
     const engText = scene.add.text(0, 12, '📈 +' + post.engagement, {
-        fontSize: '15px',
+        fontSize: '17px',
         fill: '#7dffb3',
         fontStyle: 'bold'
     });
@@ -523,7 +523,7 @@ function createPostCard(scene, x, y, post, label) {
     const stabColor = post.stability < 0 ? '#ff7675' : '#74b9ff';
     const stabSign = post.stability >= 0 ? '+' : '';
     const stabText = scene.add.text(0, 35, '⚖️ ' + stabSign + post.stability, {
-        fontSize: '15px',
+        fontSize: '17px',
         fill: stabColor,
         fontStyle: 'bold'
     });
