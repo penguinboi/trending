@@ -791,8 +791,18 @@ function handleAction(action) {
                 stability += 1;
                 flashCard(container, 0x00ff88);
             }
-            pair.resolved = true;
+            // Mark post as suppressed (algorithm will choose the other post)
+            post.suppressed = true;
             container.resolved = true;
+            // Add large NO sign over the post
+            const noSign = container.scene.add.text(0, 0, '🚫', {
+                fontSize: '80px'
+            }).setOrigin(0.5);
+            container.add(noSign);
+            // If both posts suppressed, resolve the pair with no promotion
+            if (pair.postA.suppressed && pair.postB.suppressed) {
+                pair.resolved = true;
+            }
             break;
 
         case 'verify':
@@ -828,8 +838,26 @@ function flashCard(container, color) {
 function algorithmDecides(pair) {
     if (pair.resolved) return;
 
-    // Algorithm always picks higher engagement
-    const chosenIsA = pair.postA.engagement >= pair.postB.engagement;
+    // Check for suppressed posts
+    const aSuppressed = pair.postA.suppressed;
+    const bSuppressed = pair.postB.suppressed;
+
+    // If both suppressed, nothing gets promoted
+    if (aSuppressed && bSuppressed) {
+        return;
+    }
+
+    // Determine which post to promote
+    let chosenIsA;
+    if (aSuppressed) {
+        chosenIsA = false; // A suppressed, choose B
+    } else if (bSuppressed) {
+        chosenIsA = true; // B suppressed, choose A
+    } else {
+        // Neither suppressed, algorithm picks higher engagement
+        chosenIsA = pair.postA.engagement >= pair.postB.engagement;
+    }
+
     const chosen = chosenIsA ? pair.postA : pair.postB;
     const chosenLabel = chosenIsA ? 'A' : 'B';
 
