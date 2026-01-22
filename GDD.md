@@ -102,7 +102,7 @@ Oversight failure is systemic, not player error.
 
 * The player's decision zone is on the right side of the queue
 
-* Pairs that reach the end without intervention are automatically resolved by the algorithm
+* Pairs that reach the end without intervention are automatically resolved—the algorithm promotes one post and excludes the other
 
 * Early game: Belt moves slowly, 1–2 pairs visible, plenty of time to decide
 
@@ -110,7 +110,7 @@ Oversight failure is systemic, not player error.
 
 * The visual backlog communicates pressure without explicit failure states
 
-* Unhandled pairs sliding off-screen make the algorithm's dominance visible
+* Unhandled pairs sliding off-screen show the algorithm's choice—one promoted, one excluded—making its dominance visible
 
 ---
 
