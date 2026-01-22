@@ -123,29 +123,29 @@ function create() {
     currentScene = this;
 
     // Game title
-    this.add.text(640, 25, '📱 TRENDING 📱', {
+    this.add.text(640, 25, '🔥 TRENDING 🔥', {
         fontSize: '53px',
         fill: '#5a3d7a',
         fontStyle: 'bold'
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setDepth(100);
 
     // Tagline
     this.add.text(640, 60, '🌍 The world sees what you choose to show 👀', {
         fontSize: '18px',
         fill: '#7a6a9a',
         fontStyle: 'italic'
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setDepth(100);
 
     // Decision zone (right side of screen)
     decisionZone = this.add.rectangle(1100, 360, 200, 600, 0x2d2d4a, 0.3);
     decisionZone.setStrokeStyle(2, 0x4a4a6a);
 
     // Decision zone label
-    this.add.text(1100, 80, '⚠️ DECISION\nZONE ⚠️', {
-        fontSize: '18px',
+    this.add.text(1100, 80, '⚠️ DECISION ZONE ⚠️', {
+        fontSize: '14px',
         fill: '#7a6a9a',
         align: 'center'
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setDepth(100);
 
     // Belt track
     this.add.rectangle(640, 360, 1200, 300, 0x0f0f1a, 0.5);
@@ -155,26 +155,27 @@ function create() {
         this.add.line(0, 0, i * 100, 220, i * 100, 500, 0x2a2a3a).setOrigin(0);
     }
 
-    // UI: Engagement meter
-    this.add.text(20, 20, '📈 User Engagement', { fontSize: '15px', fill: '#6a5a8a' });
-    engagementText = this.add.text(20, 40, '0', { fontSize: '31px', fill: '#00aa66' });
+    // UI: Engagement meter (depth 100 keeps UI above posts)
+    this.add.text(20, 20, '📈 User Engagement', { fontSize: '15px', fill: '#6a5a8a' }).setDepth(100);
+    engagementText = this.add.text(20, 40, '0', { fontSize: '31px', fill: '#00aa66' }).setDepth(100);
 
     // UI: Stability meter
-    this.add.text(20, 75, '⚖️ Global Stability', { fontSize: '15px', fill: '#6a5a8a' });
-    stabilityText = this.add.text(20, 95, '100%', { fontSize: '26px', fill: '#cc8800' });
+    this.add.text(20, 75, '⚖️ Global Stability', { fontSize: '15px', fill: '#6a5a8a' }).setDepth(100);
+    stabilityText = this.add.text(20, 95, '100%', { fontSize: '26px', fill: '#cc8800' }).setDepth(100);
 
     // UI: Phase indicator
-    this.add.text(20, 130, '🎯 Phase', { fontSize: '15px', fill: '#6a5a8a' });
-    phaseText = this.add.text(20, 150, '1 / 10', { fontSize: '26px', fill: '#8866cc' });
+    this.add.text(20, 130, '🎯 Phase', { fontSize: '15px', fill: '#6a5a8a' }).setDepth(100);
+    phaseText = this.add.text(20, 150, '1 / 10', { fontSize: '26px', fill: '#8866cc' }).setDepth(100);
 
     // UI: Timer
-    this.add.text(20, 185, '⏱️ Time Left', { fontSize: '15px', fill: '#6a5a8a' });
-    timerText = this.add.text(20, 205, '10:00', { fontSize: '26px', fill: '#5a3d7a' });
+    this.add.text(20, 185, '⏱️ Time Left', { fontSize: '15px', fill: '#6a5a8a' }).setDepth(100);
+    timerText = this.add.text(20, 205, '10:00', { fontSize: '26px', fill: '#5a3d7a' }).setDepth(100);
 
     // UI: Feed display (shows last promoted content and effects)
-    this.add.text(640, 570, '📣 PROMOTED TO FEED 📣', { fontSize: '13px', fill: '#7a6a9a' }).setOrigin(0.5);
+    this.add.text(640, 570, '📣 PROMOTED TO FEED 📣', { fontSize: '13px', fill: '#7a6a9a' }).setOrigin(0.5).setDepth(100);
 
     feedContainer = this.add.container(640, 610);
+    feedContainer.setDepth(100);
 
     feedTypeText = this.add.text(0, 0, '—', {
         fontSize: '22px',
@@ -183,13 +184,13 @@ function create() {
     }).setOrigin(0.5);
     feedContainer.add(feedTypeText);
 
-    feedEngText = this.add.text(-120, 30, '', { fontSize: '18px', fill: '#00ff88' }).setOrigin(0.5);
+    feedEngText = this.add.text(-170, 30, '', { fontSize: '16px', fill: '#228833' }).setOrigin(0.5);
     feedContainer.add(feedEngText);
 
-    feedStabText = this.add.text(0, 30, '', { fontSize: '18px', fill: '#ffaa00' }).setOrigin(0.5);
+    feedStabText = this.add.text(0, 30, '', { fontSize: '16px', fill: '#228833' }).setOrigin(0.5);
     feedContainer.add(feedStabText);
 
-    feedSourceText = this.add.text(120, 30, '', { fontSize: '15px', fill: '#666' }).setOrigin(0.5);
+    feedSourceText = this.add.text(140, 30, '', { fontSize: '15px', fill: '#666' }).setOrigin(0.5);
     feedContainer.add(feedSourceText);
 
     // UI: Instructions
@@ -197,7 +198,7 @@ function create() {
         fontSize: '15px',
         fill: '#7a6a9a',
         align: 'center'
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setDepth(100);
 
     // Input handlers
     this.input.keyboard.on('keydown-P', () => handleAction('promote'));
@@ -237,16 +238,16 @@ function create() {
     const drawPlayAgainButton = (hover) => {
         playAgainGraphics.clear();
         playAgainGraphics.fillStyle(0x000000, 0.3);
-        playAgainGraphics.fillRoundedRect(-100 + 3, 160 - 25 + 3, 200, 50, 25);
+        playAgainGraphics.fillRoundedRect(-130 + 3, 160 - 30 + 3, 260, 60, 30);
         playAgainGraphics.fillStyle(hover ? 0x6c5ce7 : 0x5f27cd, 1);
-        playAgainGraphics.fillRoundedRect(-100, 160 - 25, 200, 50, 25);
+        playAgainGraphics.fillRoundedRect(-130, 160 - 30, 260, 60, 30);
         playAgainGraphics.lineStyle(3, 0xffffff, 0.6);
-        playAgainGraphics.strokeRoundedRect(-100, 160 - 25, 200, 50, 25);
+        playAgainGraphics.strokeRoundedRect(-130, 160 - 30, 260, 60, 30);
     };
     drawPlayAgainButton(false);
     gameOverOverlay.add(playAgainGraphics);
 
-    const playAgainHitbox = this.add.rectangle(0, 160, 200, 50, 0xffffff, 0);
+    const playAgainHitbox = this.add.rectangle(0, 160, 260, 60, 0xffffff, 0);
     playAgainHitbox.setInteractive({ useHandCursor: true });
     playAgainHitbox.on('pointerover', () => drawPlayAgainButton(true));
     playAgainHitbox.on('pointerout', () => drawPlayAgainButton(false));
@@ -267,22 +268,42 @@ function create() {
     const startBg = this.add.rectangle(0, 0, 1280, 720, 0xe8dff5, 1);
     startOverlay.add(startBg);
 
-    const startTitle = this.add.text(0, -260, '📱 TRENDING 📱', {
+    const startTitle = this.add.text(0, -290, '🔥 TRENDING 🔥', {
         fontSize: '79px',
         fill: '#5a3d7a',
         fontStyle: 'bold'
     }).setOrigin(0.5);
     startOverlay.add(startTitle);
 
-    const introText = this.add.text(0, -60,
-        '👋 Welcome to your first day as Content Moderator at TrendNet!\n\n' +
+    const startSubtitle = this.add.text(0, -210, 'The Content Moderator Game', {
+        fontSize: '22px',
+        fill: '#7a6a9a',
+        fontStyle: 'italic'
+    }).setOrigin(0.5);
+    startOverlay.add(startSubtitle);
+
+    const welcomeText = this.add.text(0, -150, 'Welcome to your first day as Content Moderator at', {
+        fontSize: '18px',
+        fill: '#4a4a6a',
+        align: 'center'
+    }).setOrigin(0.5);
+    startOverlay.add(welcomeText);
+
+    const wildfireText = this.add.text(0, -120, 'Wildfire Social', {
+        fontSize: '24px',
+        fill: '#ff6b35',
+        fontStyle: 'italic bold'
+    }).setOrigin(0.5);
+    startOverlay.add(wildfireText);
+
+    const introText = this.add.text(0, 45,
         '🤖 Our algorithm is designed to maximize engagement.\n' +
         'It promotes whatever gets clicks — viral content, controversy, even misinformation.\n\n' +
-        '🧠 Your job is to be the human in the loop.\n' +
+        'Your job is to be the human in the loop.\n' +
         'Review content before it trends. Promote truth. Suppress lies.\n' +
-        '⚠️ But be careful — suppress too much valid content and users will revolt!\n\n' +
-        '📊 The board wants growth. Society needs stability.\n' +
-        '⏱️ You have 10 minutes to prove you can balance both.\n\n' +
+        'But be careful — suppress too much valid content and users will revolt!\n\n' +
+        'The board wants growth. Society needs stability.\n' +
+        'You have 10 minutes to prove you can balance both.\n\n' +
         '🌍 The world is watching. 👀', {
         fontSize: '18px',
         fill: '#4a4a6a',
@@ -291,7 +312,14 @@ function create() {
     }).setOrigin(0.5);
     startOverlay.add(introText);
 
-    const controlsText = this.add.text(0, 180, '🎮  [P] ✅ Promote  |  [S] 🚫 Suppress  |  [V] 🔍 Verify', {
+    const controlsHeader = this.add.text(0, 200, '🎮 Controls', {
+        fontSize: '16px',
+        fill: '#5a3d7a',
+        fontStyle: 'bold'
+    }).setOrigin(0.5);
+    startOverlay.add(controlsHeader);
+
+    const controlsText = this.add.text(0, 225, '[P] ✅ Promote  |  [S] 🚫 Suppress  |  [V] 🔍 Verify', {
         fontSize: '15px',
         fill: '#6a5a8a',
         align: 'center'
@@ -304,33 +332,39 @@ function create() {
         startButtonGraphics.clear();
         // Shadow
         startButtonGraphics.fillStyle(0x000000, 0.3);
-        startButtonGraphics.fillRoundedRect(-110 + 4, 240 - 30 + 4, 220, 60, 30);
+        startButtonGraphics.fillRoundedRect(-130 + 4, 290 - 35 + 4, 260, 70, 35);
         // Main button
         startButtonGraphics.fillStyle(hover ? 0x00d2d3 : 0x00b894, 1);
-        startButtonGraphics.fillRoundedRect(-110, 240 - 30, 220, 60, 30);
+        startButtonGraphics.fillRoundedRect(-130, 290 - 35, 260, 70, 35);
         // Highlight
         startButtonGraphics.fillStyle(0xffffff, 0.2);
-        startButtonGraphics.fillRoundedRect(-110, 240 - 30, 220, 25, { tl: 30, tr: 30, bl: 0, br: 0 });
+        startButtonGraphics.fillRoundedRect(-130, 290 - 35, 260, 30, { tl: 35, tr: 35, bl: 0, br: 0 });
         // Border
         startButtonGraphics.lineStyle(3, 0xffffff, 0.7);
-        startButtonGraphics.strokeRoundedRect(-110, 240 - 30, 220, 60, 30);
+        startButtonGraphics.strokeRoundedRect(-130, 290 - 35, 260, 70, 35);
     };
     drawStartButton(false);
     startOverlay.add(startButtonGraphics);
 
-    const startHitbox = this.add.rectangle(0, 240, 220, 60, 0xffffff, 0);
+    const startHitbox = this.add.rectangle(0, 290, 260, 70, 0xffffff, 0);
     startHitbox.setInteractive({ useHandCursor: true });
     startHitbox.on('pointerover', () => drawStartButton(true));
     startHitbox.on('pointerout', () => drawStartButton(false));
     startHitbox.on('pointerdown', () => startGame());
     startOverlay.add(startHitbox);
 
-    const startButtonText = this.add.text(0, 250, '🚀 BEGIN SHIFT', {
+    const startButtonText = this.add.text(-8, 290, '🚀 BEGIN SHIFT', {
         fontSize: '24px',
         fill: '#ffffff',
         fontStyle: 'bold'
     }).setOrigin(0.5);
     startOverlay.add(startButtonText);
+
+    const copyrightText = this.add.text(0, 350, '© 2026 🐧 PenguinboiSoftware', {
+        fontSize: '14px',
+        fill: '#8a7aaa'
+    }).setOrigin(0.5);
+    startOverlay.add(copyrightText);
 }
 
 function update(time, delta) {
@@ -358,6 +392,8 @@ function update(time, delta) {
     if (newPhase !== currentPhase) {
         currentPhase = newPhase;
         beltSpeed = PHASE_SPEEDS[currentPhase];
+        // Reset spawn timer to prevent overlap when interval shortens
+        spawnTimer = 0;
     }
 
     // Move posts along the belt
@@ -416,8 +452,9 @@ function spawnPostPair(scene) {
     const postA = generatePost();
     const postB = generatePost();
 
-    // Create container for the pair
+    // Create container for the pair (depth 10 keeps posts below UI)
     const container = scene.add.container(-200, 360);
+    container.setDepth(10);
 
     // Post A (top)
     const cardA = createPostCard(scene, 0, -80, postA, 'A');
@@ -748,17 +785,17 @@ function updateFeed(post, label, source) {
 
     // Show engagement change
     const engSign = post.engagement >= 0 ? '+' : '';
-    feedEngText.setText(`ENG: ${engSign}${post.engagement}`);
-    feedEngText.setFill(post.engagement >= 0 ? '#00ff88' : '#ff4444');
+    feedEngText.setText(`Engagement: ${engSign}${post.engagement}`);
+    feedEngText.setFill(post.engagement >= 0 ? '#228833' : '#cc4444');
 
     // Show stability change
     const stabSign = post.stability >= 0 ? '+' : '';
-    feedStabText.setText(`STAB: ${stabSign}${post.stability}`);
-    feedStabText.setFill(post.stability >= 0 ? '#00ff88' : '#ff4444');
+    feedStabText.setText(`Stability: ${stabSign}${post.stability}`);
+    feedStabText.setFill(post.stability >= 0 ? '#228833' : '#cc4444');
 
     // Show who made the decision
     feedSourceText.setText(`by ${source}`);
-    feedSourceText.setFill(source === 'ALGORITHM' ? '#ff6666' : '#66ff66');
+    feedSourceText.setFill(source === 'ALGORITHM' ? '#cc4444' : '#228833');
 }
 
 function triggerGameOver(title, reason) {
