@@ -40,6 +40,14 @@ let spawnTimer = 0;
 let engagement = 0;
 let stability = 100;
 let selectedPost = null;
+let gameOver = false;
+let gameOverReason = '';
+
+// Game over UI
+let gameOverOverlay;
+let gameOverText;
+let gameOverSubtext;
+let finalStatsText;
 
 // UI elements
 let engagementText;
@@ -53,6 +61,13 @@ function preload() {
 // UI references for phase/timer
 let phaseText;
 let timerText;
+
+// Feed display (shows last promoted post and effects)
+let feedContainer;
+let feedTypeText;
+let feedEngText;
+let feedStabText;
+let feedSourceText;
 
 function create() {
     // Game title
@@ -104,8 +119,29 @@ function create() {
     this.add.text(20, 170, 'Time Left in Term', { fontSize: '14px', fill: '#888' });
     timerText = this.add.text(20, 188, '10:00', { fontSize: '24px', fill: '#ffffff' });
 
+    // UI: Feed display (shows last promoted content and effects)
+    this.add.text(640, 570, 'PROMOTED TO FEED', { fontSize: '12px', fill: '#666' }).setOrigin(0.5);
+
+    feedContainer = this.add.container(640, 610);
+
+    feedTypeText = this.add.text(0, 0, '—', {
+        fontSize: '20px',
+        fill: '#888',
+        fontStyle: 'bold'
+    }).setOrigin(0.5);
+    feedContainer.add(feedTypeText);
+
+    feedEngText = this.add.text(-120, 30, '', { fontSize: '16px', fill: '#00ff88' }).setOrigin(0.5);
+    feedContainer.add(feedEngText);
+
+    feedStabText = this.add.text(0, 30, '', { fontSize: '16px', fill: '#ffaa00' }).setOrigin(0.5);
+    feedContainer.add(feedStabText);
+
+    feedSourceText = this.add.text(120, 30, '', { fontSize: '14px', fill: '#666' }).setOrigin(0.5);
+    feedContainer.add(feedSourceText);
+
     // UI: Instructions
-    this.add.text(640, 680, 'Click a post in the Decision Zone to select it. Press [P] Promote | [S] Suppress | [V] Verify', {
+    this.add.text(640, 680, 'Click on a post before it leaves the Decision Zone to select it. Press [P] Promote | [S] Suppress | [V] Verify', {
         fontSize: '14px',
         fill: '#6a6a8a',
         align: 'center'
@@ -116,11 +152,52 @@ function create() {
     this.input.keyboard.on('keydown-S', () => handleAction('suppress'));
     this.input.keyboard.on('keydown-V', () => handleAction('verify'));
 
+    // Game over overlay (hidden initially)
+    gameOverOverlay = this.add.container(640, 360);
+    gameOverOverlay.setVisible(false);
+
+    const overlay = this.add.rectangle(0, 0, 1280, 720, 0x000000, 0.85);
+    gameOverOverlay.add(overlay);
+
+    gameOverText = this.add.text(0, -80, 'GAME OVER', {
+        fontSize: '64px',
+        fill: '#ff4444',
+        fontStyle: 'bold'
+    }).setOrigin(0.5);
+    gameOverOverlay.add(gameOverText);
+
+    gameOverSubtext = this.add.text(0, 0, '', {
+        fontSize: '24px',
+        fill: '#ffffff'
+    }).setOrigin(0.5);
+    gameOverOverlay.add(gameOverSubtext);
+
+    finalStatsText = this.add.text(0, 80, '', {
+        fontSize: '20px',
+        fill: '#888888',
+        align: 'center'
+    }).setOrigin(0.5);
+    gameOverOverlay.add(finalStatsText);
+
     // Spawn initial post pair
     spawnPostPair(this);
 }
 
 function update(time, delta) {
+    // Check for game over
+    if (gameOver) return;
+
+    // Check loss conditions
+    if (stability <= 0) {
+        triggerGameOver('SOCIETAL COLLAPSE', 'The world has become divided and unstable.\nYour platform accelerated the fracturing of society.');
+        return;
+    }
+
+    if (gameTimer >= GAME_DURATION) {
+        triggerGameOver('TERM COMPLETED', 'You survived your term as content moderator.\nThe world kept watching... for now.');
+        return;
+    }
+
     // Update game timer and phase progression
     gameTimer += delta;
     const newPhase = Math.min(9, Math.floor(gameTimer / PHASE_DURATION));
@@ -198,6 +275,17 @@ function spawnPostPair(scene) {
     const vs = scene.add.text(0, 0, 'VS', { fontSize: '20px', fill: '#4a4a6a', fontStyle: 'bold' });
     vs.setOrigin(0.5);
     container.add(vs);
+
+    // Algorithm choice indicator (shows which post the algorithm will pick)
+    const algoChoice = postA.engagement >= postB.engagement ? cardA : cardB;
+    const algoIndicator = scene.add.text(0, 45, '🤖 AUTO', {
+        fontSize: '14px',
+        fill: '#ffffff',
+        backgroundColor: '#000000aa',
+        padding: { x: 6, y: 2 }
+    });
+    algoIndicator.setOrigin(0.5);
+    algoChoice.add(algoIndicator);
 
     const pair = {
         x: -200,
@@ -318,12 +406,16 @@ function handleAction(action) {
 
     if (!pair || pair.resolved) return;
 
+    // Determine which post label (A or B)
+    const postLabel = pair.postA === post ? 'A' : 'B';
+
     switch (action) {
         case 'promote':
             engagement += post.engagement;
             stability += post.stability;
             pair.resolved = true;
             flashCard(container, 0x00ff88);
+            updateFeed(post, postLabel, 'YOU');
             break;
 
         case 'suppress':
@@ -363,7 +455,9 @@ function algorithmDecides(pair) {
     if (pair.resolved) return;
 
     // Algorithm always picks higher engagement
-    const chosen = pair.postA.engagement >= pair.postB.engagement ? pair.postA : pair.postB;
+    const chosenIsA = pair.postA.engagement >= pair.postB.engagement;
+    const chosen = chosenIsA ? pair.postA : pair.postB;
+    const chosenLabel = chosenIsA ? 'A' : 'B';
 
     engagement += chosen.engagement;
     stability += chosen.stability;
@@ -371,5 +465,50 @@ function algorithmDecides(pair) {
     // Clamp stability
     stability = Math.max(0, Math.min(100, stability));
 
-    console.log(`Algorithm chose: ${chosen.type} (+${chosen.engagement} eng, ${chosen.stability} stab)`);
+    // Update feed display
+    updateFeed(chosen, chosenLabel, 'ALGORITHM');
+}
+
+function updateFeed(post, label, source) {
+    // Update feed type with post label and color based on content type
+    feedTypeText.setText(`Post ${label}: ${post.type.toUpperCase()}`);
+    feedTypeText.setFill(getTypeColorHex(post.type));
+
+    // Show engagement change
+    const engSign = post.engagement >= 0 ? '+' : '';
+    feedEngText.setText(`ENG: ${engSign}${post.engagement}`);
+    feedEngText.setFill(post.engagement >= 0 ? '#00ff88' : '#ff4444');
+
+    // Show stability change
+    const stabSign = post.stability >= 0 ? '+' : '';
+    feedStabText.setText(`STAB: ${stabSign}${post.stability}`);
+    feedStabText.setFill(post.stability >= 0 ? '#00ff88' : '#ff4444');
+
+    // Show who made the decision
+    feedSourceText.setText(`by ${source}`);
+    feedSourceText.setFill(source === 'ALGORITHM' ? '#ff6666' : '#66ff66');
+}
+
+function triggerGameOver(title, reason) {
+    gameOver = true;
+    gameOverReason = reason;
+
+    // Update game over overlay
+    gameOverText.setText(title);
+    gameOverText.setFill(title === 'TERM COMPLETED' ? '#00ff88' : '#ff4444');
+    gameOverSubtext.setText(reason);
+    finalStatsText.setText(`Final Engagement: ${Math.floor(engagement)}\nFinal Stability: ${Math.floor(stability)}%\nPhase Reached: ${currentPhase + 1}/10`);
+
+    gameOverOverlay.setVisible(true);
+}
+
+function getTypeColorHex(type) {
+    const colors = {
+        'neutral': '#4a5568',
+        'positive': '#48bb78',
+        'viral': '#9f7aea',
+        'controversial': '#ed8936',
+        'fake news': '#e53e3e'
+    };
+    return colors[type] || '#4a5568';
 }
