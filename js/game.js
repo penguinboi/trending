@@ -122,6 +122,7 @@ let feedTypeText;
 let feedEngText;
 let feedStabText;
 let feedSourceText;
+let feedFakeText;
 
 function create() {
     // Store scene reference for reset functionality
@@ -193,6 +194,9 @@ function create() {
 
     feedSourceText = this.add.text(140, 30, '', { fontSize: '15px', fill: '#666' }).setOrigin(0.5);
     feedContainer.add(feedSourceText);
+
+    feedFakeText = this.add.text(0, 55, '', { fontSize: '14px', fill: '#cc4444', fontStyle: 'bold' }).setOrigin(0.5);
+    feedContainer.add(feedFakeText);
 
     // UI: Instructions
     this.add.text(640, 680, '👆 Click to select | [P] ✅ Promote | [S] 🚫 Suppress | [V] 🔍 Verify | 🤖 = Algorithm\'s pick', {
@@ -761,11 +765,20 @@ function handleAction(action) {
     switch (action) {
         case 'promote':
             engagement += post.engagement;
-            stability += post.stability;
+            // Fake news has worse stability impact
+            let stabEffect = post.stability;
+            if (post.isFakeNews) {
+                if (stabEffect > 0) {
+                    stabEffect = -stabEffect; // Positive becomes negative
+                } else {
+                    stabEffect = stabEffect * 2; // Negative is doubled
+                }
+            }
+            stability += stabEffect;
             pair.resolved = true;
             container.resolved = true;
             flashCard(container, 0x00ff88);
-            updateFeed(post, postLabel, 'YOU');
+            updateFeed(post, postLabel, 'YOU', stabEffect);
             break;
 
         case 'suppress':
@@ -821,16 +834,29 @@ function algorithmDecides(pair) {
     const chosenLabel = chosenIsA ? 'A' : 'B';
 
     engagement += chosen.engagement;
-    stability += chosen.stability;
+
+    // Fake news has worse stability impact
+    let stabEffect = chosen.stability;
+    if (chosen.isFakeNews) {
+        if (stabEffect > 0) {
+            stabEffect = -stabEffect; // Positive becomes negative
+        } else {
+            stabEffect = stabEffect * 2; // Negative is doubled
+        }
+    }
+    stability += stabEffect;
 
     // Clamp stability
     stability = Math.max(0, Math.min(100, stability));
 
     // Update feed display
-    updateFeed(chosen, chosenLabel, 'ALGORITHM');
+    updateFeed(chosen, chosenLabel, 'ALGORITHM', stabEffect);
 }
 
-function updateFeed(post, label, source) {
+function updateFeed(post, label, source, actualStability) {
+    // Use actual stability effect if provided (accounts for fake news penalty)
+    const stabEffect = actualStability !== undefined ? actualStability : post.stability;
+
     // Update feed with reaction emoji and label
     feedTypeText.setText(`Post ${label}: ${post.emoji}`);
     feedTypeText.setFill(getReactionColorHex(post.reaction));
@@ -840,14 +866,23 @@ function updateFeed(post, label, source) {
     feedEngText.setText(`Engagement: ${engSign}${post.engagement}`);
     feedEngText.setFill('#228833');
 
-    // Show stability change (revealed after promotion)
-    const stabSign = post.stability >= 0 ? '+' : '';
-    feedStabText.setText(`Stability: ${stabSign}${post.stability}`);
-    feedStabText.setFill(post.stability >= 0 ? '#228833' : '#cc4444');
+    // Show stability change (revealed after promotion, includes fake news penalty)
+    const stabSign = stabEffect >= 0 ? '+' : '';
+    feedStabText.setText(`Stability: ${stabSign}${stabEffect}`);
+    feedStabText.setFill(stabEffect >= 0 ? '#228833' : '#cc4444');
 
     // Show who made the decision
     feedSourceText.setText(`by ${source}`);
     feedSourceText.setFill(source === 'ALGORITHM' ? '#cc4444' : '#228833');
+
+    // Show fake news status
+    if (post.isFakeNews) {
+        feedFakeText.setText('🚨 FAKE NEWS');
+        feedFakeText.setFill('#cc4444');
+    } else {
+        feedFakeText.setText('✅ VERIFIED REAL');
+        feedFakeText.setFill('#228833');
+    }
 }
 
 function triggerGameOver(title, reason) {
@@ -912,6 +947,7 @@ function resetGame() {
     feedEngText.setText('');
     feedStabText.setText('');
     feedSourceText.setText('');
+    feedFakeText.setText('');
 
     // Hide game over, show start screen
     gameOverOverlay.setVisible(false);
