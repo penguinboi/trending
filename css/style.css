@@ -8,7 +8,7 @@
 }
 
 body {
-    background-color: #1a1a2e;
+    background-color: #e8dff5;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -20,4 +20,10 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+/* Improve canvas rendering quality on retina displays */
+#game-container canvas {
+    image-rendering: auto;
+    image-rendering: high-quality;
 }

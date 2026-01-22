@@ -1,12 +1,21 @@
 // ABOUTME: Main game entry point for Trending
 // ABOUTME: Sets up Phaser 3 game with conveyor belt queue system
 
+// Detect device pixel ratio for crisp rendering on retina displays
+const dpr = window.devicePixelRatio || 1;
+
 const config = {
     type: Phaser.AUTO,
     width: 1280,
     height: 720,
     parent: 'game-container',
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#e8dff5',
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        zoom: 1 / dpr
+    },
+    resolution: dpr,
     scene: {
         preload: preload,
         create: create,
@@ -32,6 +41,40 @@ const CARD_CLEARANCE = 220;
 function getSpawnInterval() {
     return (CARD_CLEARANCE / beltSpeed) * 1000;
 }
+
+// Helper to create rounded rectangle with fill and optional stroke
+function createRoundedRect(scene, x, y, width, height, radius, fillColor, fillAlpha, strokeColor, strokeWidth) {
+    const graphics = scene.add.graphics();
+    if (fillColor !== undefined) {
+        graphics.fillStyle(fillColor, fillAlpha !== undefined ? fillAlpha : 1);
+        graphics.fillRoundedRect(x - width/2, y - height/2, width, height, radius);
+    }
+    if (strokeColor !== undefined && strokeWidth) {
+        graphics.lineStyle(strokeWidth, strokeColor, 1);
+        graphics.strokeRoundedRect(x - width/2, y - height/2, width, height, radius);
+    }
+    return graphics;
+}
+
+// Vibrant color palette
+const COLORS = {
+    background: 0x1a1a2e,
+    cardNeutral: 0x5a6578,
+    cardPositive: 0x2ecc71,
+    cardViral: 0x9b59b6,
+    cardControversial: 0xe67e22,
+    cardFakeNews: 0xe74c3c,
+    buttonGreen: 0x27ae60,
+    buttonGreenHover: 0x2ecc71,
+    buttonGray: 0x5d6d7e,
+    buttonGrayHover: 0x7f8c8d,
+    accent: 0x3498db,
+    warning: 0xf39c12,
+    danger: 0xe74c3c,
+    success: 0x2ecc71,
+    textLight: 0xffffff,
+    textMuted: 0x95a5a6
+};
 
 // Game state
 let postPairs = [];
@@ -82,14 +125,14 @@ function create() {
     // Game title
     this.add.text(640, 25, 'TRENDING', {
         fontSize: '48px',
-        fill: '#ffffff',
+        fill: '#5a3d7a',
         fontStyle: 'bold'
     }).setOrigin(0.5);
 
     // Tagline
     this.add.text(640, 60, 'The world sees what you choose to show', {
         fontSize: '16px',
-        fill: '#6a6a8a',
+        fill: '#7a6a9a',
         fontStyle: 'italic'
     }).setOrigin(0.5);
 
@@ -100,7 +143,7 @@ function create() {
     // Decision zone label
     this.add.text(1100, 80, 'DECISION\nZONE', {
         fontSize: '16px',
-        fill: '#6a6a8a',
+        fill: '#7a6a9a',
         align: 'center'
     }).setOrigin(0.5);
 
@@ -113,29 +156,29 @@ function create() {
     }
 
     // UI: Engagement meter
-    this.add.text(20, 20, 'User Engagement', { fontSize: '14px', fill: '#888' });
-    engagementText = this.add.text(20, 40, '0', { fontSize: '28px', fill: '#00ff88' });
+    this.add.text(20, 20, 'User Engagement', { fontSize: '14px', fill: '#6a5a8a' });
+    engagementText = this.add.text(20, 40, '0', { fontSize: '28px', fill: '#00aa66' });
 
     // UI: Stability meter
-    this.add.text(20, 70, 'Global Stability', { fontSize: '14px', fill: '#888' });
-    stabilityText = this.add.text(20, 88, '100%', { fontSize: '24px', fill: '#ffaa00' });
+    this.add.text(20, 70, 'Global Stability', { fontSize: '14px', fill: '#6a5a8a' });
+    stabilityText = this.add.text(20, 88, '100%', { fontSize: '24px', fill: '#cc8800' });
 
     // UI: Phase indicator
-    this.add.text(20, 120, 'Phase', { fontSize: '14px', fill: '#888' });
-    phaseText = this.add.text(20, 138, '1 / 10', { fontSize: '24px', fill: '#aa88ff' });
+    this.add.text(20, 120, 'Phase', { fontSize: '14px', fill: '#6a5a8a' });
+    phaseText = this.add.text(20, 138, '1 / 10', { fontSize: '24px', fill: '#8866cc' });
 
     // UI: Timer
-    this.add.text(20, 170, 'Time Left in Term', { fontSize: '14px', fill: '#888' });
-    timerText = this.add.text(20, 188, '10:00', { fontSize: '24px', fill: '#ffffff' });
+    this.add.text(20, 170, 'Time Left in Term', { fontSize: '14px', fill: '#6a5a8a' });
+    timerText = this.add.text(20, 188, '10:00', { fontSize: '24px', fill: '#5a3d7a' });
 
     // UI: Feed display (shows last promoted content and effects)
-    this.add.text(640, 570, 'PROMOTED TO FEED', { fontSize: '12px', fill: '#666' }).setOrigin(0.5);
+    this.add.text(640, 570, 'PROMOTED TO FEED', { fontSize: '12px', fill: '#7a6a9a' }).setOrigin(0.5);
 
     feedContainer = this.add.container(640, 610);
 
     feedTypeText = this.add.text(0, 0, '—', {
         fontSize: '20px',
-        fill: '#888',
+        fill: '#6a5a8a',
         fontStyle: 'bold'
     }).setOrigin(0.5);
     feedContainer.add(feedTypeText);
@@ -152,7 +195,7 @@ function create() {
     // UI: Instructions
     this.add.text(640, 680, 'Click on a post before it leaves the Decision Zone to select it. Press [P] Promote | [S] Suppress | [V] Verify', {
         fontSize: '14px',
-        fill: '#6a6a8a',
+        fill: '#7a6a9a',
         align: 'center'
     }).setOrigin(0.5);
 
@@ -189,17 +232,29 @@ function create() {
     }).setOrigin(0.5);
     gameOverOverlay.add(finalStatsText);
 
-    // Play again button
-    const playAgainBg = this.add.rectangle(0, 160, 200, 50, 0x4a4a6a, 1);
-    playAgainBg.setStrokeStyle(2, 0xffffff, 0.5);
-    playAgainBg.setInteractive({ useHandCursor: true });
-    playAgainBg.on('pointerover', () => playAgainBg.setFillStyle(0x6a6a8a, 1));
-    playAgainBg.on('pointerout', () => playAgainBg.setFillStyle(0x4a4a6a, 1));
-    playAgainBg.on('pointerdown', () => resetGame());
-    gameOverOverlay.add(playAgainBg);
+    // Play again button with rounded corners
+    const playAgainGraphics = this.add.graphics();
+    const drawPlayAgainButton = (hover) => {
+        playAgainGraphics.clear();
+        playAgainGraphics.fillStyle(0x000000, 0.3);
+        playAgainGraphics.fillRoundedRect(-100 + 3, 160 - 25 + 3, 200, 50, 25);
+        playAgainGraphics.fillStyle(hover ? 0x6c5ce7 : 0x5f27cd, 1);
+        playAgainGraphics.fillRoundedRect(-100, 160 - 25, 200, 50, 25);
+        playAgainGraphics.lineStyle(3, 0xffffff, 0.6);
+        playAgainGraphics.strokeRoundedRect(-100, 160 - 25, 200, 50, 25);
+    };
+    drawPlayAgainButton(false);
+    gameOverOverlay.add(playAgainGraphics);
 
-    playAgainButton = this.add.text(0, 160, 'PLAY AGAIN', {
-        fontSize: '24px',
+    const playAgainHitbox = this.add.rectangle(0, 160, 200, 50, 0xffffff, 0);
+    playAgainHitbox.setInteractive({ useHandCursor: true });
+    playAgainHitbox.on('pointerover', () => drawPlayAgainButton(true));
+    playAgainHitbox.on('pointerout', () => drawPlayAgainButton(false));
+    playAgainHitbox.on('pointerdown', () => resetGame());
+    gameOverOverlay.add(playAgainHitbox);
+
+    playAgainButton = this.add.text(0, 160, '🔄 PLAY AGAIN', {
+        fontSize: '20px',
         fill: '#ffffff',
         fontStyle: 'bold'
     }).setOrigin(0.5);
@@ -209,12 +264,12 @@ function create() {
     startOverlay = this.add.container(640, 360);
     startOverlay.setDepth(1001);
 
-    const startBg = this.add.rectangle(0, 0, 1280, 720, 0x1a1a2e, 1);
+    const startBg = this.add.rectangle(0, 0, 1280, 720, 0xe8dff5, 1);
     startOverlay.add(startBg);
 
     const startTitle = this.add.text(0, -260, 'TRENDING', {
         fontSize: '72px',
-        fill: '#ffffff',
+        fill: '#5a3d7a',
         fontStyle: 'bold'
     }).setOrigin(0.5);
     startOverlay.add(startTitle);
@@ -230,29 +285,48 @@ function create() {
         'You have 10 minutes to prove you can balance both.\n\n' +
         'The world is watching.', {
         fontSize: '16px',
-        fill: '#aaaaaa',
+        fill: '#4a4a6a',
         align: 'center',
         lineSpacing: 6
     }).setOrigin(0.5);
     startOverlay.add(introText);
 
-    const controlsText = this.add.text(0, 170, '[P] Promote  |  [S] Suppress  |  [V] Verify', {
+    const controlsText = this.add.text(0, 170, '🎮  [P] Promote  |  [S] Suppress  |  [V] Verify', {
         fontSize: '14px',
-        fill: '#666666',
+        fill: '#6a5a8a',
         align: 'center'
     }).setOrigin(0.5);
     startOverlay.add(controlsText);
 
-    const startButtonBg = this.add.rectangle(0, 240, 200, 60, 0x48bb78, 1);
-    startButtonBg.setStrokeStyle(2, 0xffffff, 0.5);
-    startButtonBg.setInteractive({ useHandCursor: true });
-    startButtonBg.on('pointerover', () => startButtonBg.setFillStyle(0x68db98, 1));
-    startButtonBg.on('pointerout', () => startButtonBg.setFillStyle(0x48bb78, 1));
-    startButtonBg.on('pointerdown', () => startGame());
-    startOverlay.add(startButtonBg);
+    // Start button with rounded corners
+    const startButtonGraphics = this.add.graphics();
+    const drawStartButton = (hover) => {
+        startButtonGraphics.clear();
+        // Shadow
+        startButtonGraphics.fillStyle(0x000000, 0.3);
+        startButtonGraphics.fillRoundedRect(-110 + 4, 240 - 30 + 4, 220, 60, 30);
+        // Main button
+        startButtonGraphics.fillStyle(hover ? 0x00d2d3 : 0x00b894, 1);
+        startButtonGraphics.fillRoundedRect(-110, 240 - 30, 220, 60, 30);
+        // Highlight
+        startButtonGraphics.fillStyle(0xffffff, 0.2);
+        startButtonGraphics.fillRoundedRect(-110, 240 - 30, 220, 25, { tl: 30, tr: 30, bl: 0, br: 0 });
+        // Border
+        startButtonGraphics.lineStyle(3, 0xffffff, 0.7);
+        startButtonGraphics.strokeRoundedRect(-110, 240 - 30, 220, 60, 30);
+    };
+    drawStartButton(false);
+    startOverlay.add(startButtonGraphics);
 
-    const startButtonText = this.add.text(0, 240, 'BEGIN SHIFT', {
-        fontSize: '24px',
+    const startHitbox = this.add.rectangle(0, 240, 220, 60, 0xffffff, 0);
+    startHitbox.setInteractive({ useHandCursor: true });
+    startHitbox.on('pointerover', () => drawStartButton(true));
+    startHitbox.on('pointerout', () => drawStartButton(false));
+    startHitbox.on('pointerdown', () => startGame());
+    startOverlay.add(startHitbox);
+
+    const startButtonText = this.add.text(0, 240, '▶ BEGIN SHIFT', {
+        fontSize: '22px',
         fill: '#ffffff',
         fontStyle: 'bold'
     }).setOrigin(0.5);
@@ -294,9 +368,12 @@ function update(time, delta) {
 
         // Warning glow when in decision zone (x > 950) and unresolved
         if (pair.x > 950 && !pair.resolved) {
-            const pulse = 0.5 + 0.5 * Math.sin(gameTimer / 100);
-            pair.cardA.bg.setStrokeStyle(4, 0xff6600, pulse);
-            pair.cardB.bg.setStrokeStyle(4, 0xff6600, pulse);
+            if (!pair.inWarningZone) {
+                pair.inWarningZone = true;
+                // Redraw cards with warning border
+                redrawCardWarning(pair.cardA.bg, pair.cardA.cardWidth, pair.cardA.cardHeight, pair.cardA.cornerRadius, pair.cardA.cardColor);
+                redrawCardWarning(pair.cardB.bg, pair.cardB.cardWidth, pair.cardB.cardHeight, pair.cardB.cornerRadius, pair.cardB.cardColor);
+            }
         }
 
         // Check if pair has exited decision zone (algorithm decides)
@@ -357,11 +434,11 @@ function spawnPostPair(scene) {
 
     // Algorithm choice indicator (shows which post the algorithm will pick)
     const algoChoice = postA.engagement >= postB.engagement ? cardA : cardB;
-    const algoIndicator = scene.add.text(0, 45, '🤖 AUTO', {
-        fontSize: '14px',
+    const algoIndicator = scene.add.text(70, -40, '🤖', {
+        fontSize: '16px',
         fill: '#ffffff',
         backgroundColor: '#000000aa',
-        padding: { x: 6, y: 2 }
+        padding: { x: 4, y: 2 }
     });
     algoIndicator.setOrigin(0.5);
     algoChoice.add(algoIndicator);
@@ -381,46 +458,157 @@ function spawnPostPair(scene) {
 
 function createPostCard(scene, x, y, post, label) {
     const container = scene.add.container(x, y);
+    const cardWidth = 180;
+    const cardHeight = 120;
+    const cornerRadius = 16;
 
-    // Card background
-    const bg = scene.add.rectangle(0, 0, 180, 120, getTypeColor(post.type), 0.8);
-    bg.setStrokeStyle(2, 0xffffff, 0.3);
-    container.add(bg);
+    // Card background with rounded corners
+    const bgGraphics = scene.add.graphics();
+    const cardColor = getTypeColor(post.type);
 
-    // Post label (A or B)
-    const labelText = scene.add.text(-70, -45, 'Post ' + label, { fontSize: '14px', fill: '#fff', fontStyle: 'bold' });
+    // Draw card with shadow effect
+    bgGraphics.fillStyle(0x000000, 0.3);
+    bgGraphics.fillRoundedRect(-cardWidth/2 + 4, -cardHeight/2 + 4, cardWidth, cardHeight, cornerRadius);
+
+    // Main card fill
+    bgGraphics.fillStyle(cardColor, 1);
+    bgGraphics.fillRoundedRect(-cardWidth/2, -cardHeight/2, cardWidth, cardHeight, cornerRadius);
+
+    // Lighter top highlight for 3D effect
+    bgGraphics.fillStyle(0xffffff, 0.15);
+    bgGraphics.fillRoundedRect(-cardWidth/2, -cardHeight/2, cardWidth, cardHeight/3, { tl: cornerRadius, tr: cornerRadius, bl: 0, br: 0 });
+
+    // Border
+    bgGraphics.lineStyle(3, 0xffffff, 0.4);
+    bgGraphics.strokeRoundedRect(-cardWidth/2, -cardHeight/2, cardWidth, cardHeight, cornerRadius);
+    container.add(bgGraphics);
+
+    // Invisible hitbox for interaction
+    const hitbox = scene.add.rectangle(0, 0, cardWidth, cardHeight, 0xffffff, 0);
+    hitbox.setInteractive({ useHandCursor: true });
+    container.add(hitbox);
+
+    // Post label badge (A or B)
+    const badgeGraphics = scene.add.graphics();
+    badgeGraphics.fillStyle(0x000000, 0.4);
+    badgeGraphics.fillRoundedRect(-cardWidth/2 + 8, -cardHeight/2 + 8, 60, 24, 8);
+    container.add(badgeGraphics);
+
+    const labelText = scene.add.text(-cardWidth/2 + 38, -cardHeight/2 + 20, 'Post ' + label, {
+        fontSize: '12px',
+        fill: '#fff',
+        fontStyle: 'bold'
+    }).setOrigin(0.5);
     container.add(labelText);
 
-    // Post type
-    const typeText = scene.add.text(0, -25, post.type.toUpperCase(), { fontSize: '12px', fill: '#fff' });
+    // Post type with emoji
+    const typeEmoji = getTypeEmoji(post.type);
+    const typeText = scene.add.text(0, -15, typeEmoji + ' ' + post.type.toUpperCase(), {
+        fontSize: '13px',
+        fill: '#fff',
+        fontStyle: 'bold'
+    });
     typeText.setOrigin(0.5);
     container.add(typeText);
 
-    // Expected engagement
-    const engText = scene.add.text(0, 5, 'ENG: +' + post.engagement, { fontSize: '14px', fill: '#00ff88' });
+    // Stats with icons
+    const engText = scene.add.text(0, 12, '📈 +' + post.engagement, {
+        fontSize: '15px',
+        fill: '#7dffb3',
+        fontStyle: 'bold'
+    });
     engText.setOrigin(0.5);
     container.add(engText);
 
-    // Expected instability
-    const stabText = scene.add.text(0, 25, 'STAB: ' + post.stability, { fontSize: '14px', fill: post.stability < 0 ? '#ff4444' : '#ffaa00' });
+    const stabColor = post.stability < 0 ? '#ff7675' : '#74b9ff';
+    const stabSign = post.stability >= 0 ? '+' : '';
+    const stabText = scene.add.text(0, 35, '⚖️ ' + stabSign + post.stability, {
+        fontSize: '15px',
+        fill: stabColor,
+        fontStyle: 'bold'
+    });
     stabText.setOrigin(0.5);
     container.add(stabText);
 
-    // Make interactive
-    bg.setInteractive();
-    bg.on('pointerdown', () => selectPost(post, container, bg));
-    bg.on('pointerover', () => bg.setStrokeStyle(3, 0xffffff, 0.8));
-    bg.on('pointerout', () => {
-        if (selectedPost !== post) {
-            bg.setStrokeStyle(2, 0xffffff, 0.3);
+    // Interaction handlers
+    hitbox.on('pointerdown', () => selectPost(post, container, bgGraphics, hitbox));
+    hitbox.on('pointerover', () => {
+        bgGraphics.clear();
+        // Shadow
+        bgGraphics.fillStyle(0x000000, 0.3);
+        bgGraphics.fillRoundedRect(-cardWidth/2 + 4, -cardHeight/2 + 4, cardWidth, cardHeight, cornerRadius);
+        // Main fill (brighter on hover)
+        bgGraphics.fillStyle(cardColor, 1);
+        bgGraphics.fillRoundedRect(-cardWidth/2, -cardHeight/2, cardWidth, cardHeight, cornerRadius);
+        bgGraphics.fillStyle(0xffffff, 0.25);
+        bgGraphics.fillRoundedRect(-cardWidth/2, -cardHeight/2, cardWidth, cardHeight/3, { tl: cornerRadius, tr: cornerRadius, bl: 0, br: 0 });
+        // Bright border on hover
+        bgGraphics.lineStyle(4, 0xffffff, 0.9);
+        bgGraphics.strokeRoundedRect(-cardWidth/2, -cardHeight/2, cardWidth, cardHeight, cornerRadius);
+    });
+    hitbox.on('pointerout', () => {
+        if (!selectedPost || selectedPost.post !== post) {
+            redrawCard(bgGraphics, cardWidth, cardHeight, cornerRadius, cardColor, false);
         }
     });
 
-    // Store reference
+    // Store references
     container.postData = post;
-    container.bg = bg;
+    container.bg = bgGraphics;
+    container.hitbox = hitbox;
+    container.cardColor = cardColor;
+    container.cardWidth = cardWidth;
+    container.cardHeight = cardHeight;
+    container.cornerRadius = cornerRadius;
 
     return container;
+}
+
+function redrawCard(graphics, width, height, radius, color, selected) {
+    graphics.clear();
+    // Shadow
+    graphics.fillStyle(0x000000, 0.3);
+    graphics.fillRoundedRect(-width/2 + 4, -height/2 + 4, width, height, radius);
+    // Main fill
+    graphics.fillStyle(color, 1);
+    graphics.fillRoundedRect(-width/2, -height/2, width, height, radius);
+    // Highlight
+    graphics.fillStyle(0xffffff, 0.15);
+    graphics.fillRoundedRect(-width/2, -height/2, width, height/3, { tl: radius, tr: radius, bl: 0, br: 0 });
+    // Border
+    if (selected) {
+        graphics.lineStyle(4, 0x00ffff, 1);
+    } else {
+        graphics.lineStyle(3, 0xffffff, 0.4);
+    }
+    graphics.strokeRoundedRect(-width/2, -height/2, width, height, radius);
+}
+
+function redrawCardWarning(graphics, width, height, radius, color) {
+    graphics.clear();
+    // Shadow
+    graphics.fillStyle(0x000000, 0.3);
+    graphics.fillRoundedRect(-width/2 + 4, -height/2 + 4, width, height, radius);
+    // Main fill
+    graphics.fillStyle(color, 1);
+    graphics.fillRoundedRect(-width/2, -height/2, width, height, radius);
+    // Highlight
+    graphics.fillStyle(0xffffff, 0.15);
+    graphics.fillRoundedRect(-width/2, -height/2, width, height/3, { tl: radius, tr: radius, bl: 0, br: 0 });
+    // Warning border (orange)
+    graphics.lineStyle(4, 0xff6600, 1);
+    graphics.strokeRoundedRect(-width/2, -height/2, width, height, radius);
+}
+
+function getTypeEmoji(type) {
+    const emojis = {
+        'neutral': '📰',
+        'positive': '✨',
+        'viral': '🔥',
+        'controversial': '⚡',
+        'fake news': '🚨'
+    };
+    return emojis[type] || '📰';
 }
 
 function generatePost() {
@@ -454,23 +642,24 @@ function generatePost() {
 
 function getTypeColor(type) {
     const colors = {
-        'neutral': 0x4a5568,
-        'positive': 0x48bb78,
-        'viral': 0x9f7aea,
-        'controversial': 0xed8936,
-        'fake news': 0xe53e3e
+        'neutral': 0x636e72,
+        'positive': 0x00b894,
+        'viral': 0xa29bfe,
+        'controversial': 0xfdcb6e,
+        'fake news': 0xff7675
     };
-    return colors[type] || 0x4a5568;
+    return colors[type] || 0x636e72;
 }
 
-function selectPost(post, container, bg) {
+function selectPost(post, container, bgGraphics, hitbox) {
     // Deselect previous
-    if (selectedPost && selectedPost.bg) {
-        selectedPost.bg.setStrokeStyle(2, 0xffffff, 0.3);
+    if (selectedPost && selectedPost.container) {
+        const prev = selectedPost.container;
+        redrawCard(prev.bg, prev.cardWidth, prev.cardHeight, prev.cornerRadius, prev.cardColor, false);
     }
 
-    selectedPost = { post, container, bg };
-    bg.setStrokeStyle(4, 0x00ffff, 1);
+    selectedPost = { post, container, bg: bgGraphics, hitbox };
+    redrawCard(bgGraphics, container.cardWidth, container.cardHeight, container.cornerRadius, container.cardColor, true);
 }
 
 function handleAction(action) {
@@ -524,9 +713,9 @@ function handleAction(action) {
 }
 
 function flashCard(container, color) {
-    if (container.bg) {
-        container.bg.setFillStyle(color, 1);
-        // Reset after flash (would use tween in full implementation)
+    if (container.bg && container.cardWidth) {
+        // Redraw the card with the flash color
+        redrawCard(container.bg, container.cardWidth, container.cardHeight, container.cornerRadius, color, false);
     }
 }
 
