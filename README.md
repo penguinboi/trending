@@ -13,9 +13,9 @@ You are a Content Moderator at *Wildfire Social*, a major social media platform.
 ## 🕹️ How to Play
 
 - **Click** a post card to select it
-- **[P] Promote** - Push content to the feed
-- **[S] Suppress** - Remove content (backlash if it wasn't fake news!)
-- **[V] Verify** - Check if content is real or fake (takes time!)
+- **[P] Promote** - Push content to the feed (1.25x impact bonus!)
+- **[S] Suppress** - Block content (escalating backlash if it wasn't fake news!)
+- **[V] Verify** - Check if content is real or fake (takes 2 seconds!)
 
 If you don't act, the algorithm decides for you - and it always chooses maximum engagement.
 
@@ -25,12 +25,14 @@ Posts show their **engagement value** (visible) and **reaction type** (visible).
 
 | Reaction | Emoji | Stability | Fake News Risk |
 |----------|-------|-----------|----------------|
-| Love | ❤️ | Most stabilizing | Very low (5%) |
-| Haha | 😂 | Stabilizing | Low (15%) |
-| Like | 👍 | Neutral | Low (10%) |
-| Wow | 😮 | Neutral | Moderate (25%) |
-| Sad | 😢 | Destabilizing | Moderate (20%) |
-| Angry | 😡 | Most destabilizing | High (40%) |
+| Love | ❤️ | +2 (Most stabilizing) | Very low (5%) |
+| Haha | 😂 | +1 (Stabilizing) | Low (15%) |
+| Like | 👍 | 0 (Neutral) | Low (10%) |
+| Wow | 😮 | 0 (Neutral) | Moderate (25%) |
+| Sad | 😢 | -1 (Destabilizing) | Moderate (20%) |
+| Angry | 😡 | -3 (Most destabilizing) | High (40%) |
+
+**Tip:** Fake news inverts positive stability and doubles negative stability when promoted!
 
 ## 🏆 Win/Lose Conditions
 

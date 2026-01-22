@@ -136,15 +136,21 @@ The player must decide: verify to make informed decisions, or act quickly on ins
 
 ### **Suppression Backlash**
 
-* Suppressing fake news is stabilizing (+5 stability)
+* Suppressing fake news is stabilizing (+1 stability)
 
-* Suppressing legitimate content causes backlash (-10 stability)
+* Suppressing legitimate content causes escalating backlash (-1, -2, -3... per mistake)
 
 * Backlash represents public distrust of platform censorship
 
+* Censorship backlash counter tracks consecutive mistakes
+
 * Without verification, suppression is a gamble
 
-Players cannot censor their way to stability—guessing wrong makes things worse.
+* When a post is suppressed, the algorithm promotes the other post in the pair
+
+* Shows 🚫 overlay on suppressed post, 🤖 indicator moves to promoted post
+
+Players cannot censor their way to stability—guessing wrong makes things progressively worse.
 
 ---
 
@@ -152,12 +158,16 @@ Players cannot censor their way to stability—guessing wrong makes things worse
 
 Posts are categorized by the dominant user reaction they provoke. Reaction type determines hidden stability impact:
 
-* ❤️ Love – Most stabilizing (+8), low fake news chance (5%)
-* 😂 Haha – Stabilizing (+4), low fake news chance (15%)
+* ❤️ Love – Most stabilizing (+2), low fake news chance (5%)
+* 😂 Haha – Stabilizing (+1), low fake news chance (15%)
 * 👍 Like – Neutral (0), low fake news chance (10%)
 * 😮 Wow – Neutral (0), moderate fake news chance (25%)
-* 😢 Sad – Destabilizing (-5), moderate fake news chance (20%)
-* 😡 Angry – Most destabilizing (-12), high fake news chance (40%)
+* 😢 Sad – Destabilizing (-1), moderate fake news chance (20%)
+* 😡 Angry – Most destabilizing (-3), high fake news chance (40%)
+
+**Fake News Penalty:** When fake news is promoted, positive stability becomes negative and negative stability is doubled.
+
+**Player Promotion Bonus:** When the player manually promotes a post (vs algorithm auto-promote), effects are multiplied by 1.25x.
 
 Engagement varies independently—angry posts tend to have high engagement but damage stability.
 
@@ -195,19 +205,24 @@ Win if:
 
 ### **Art & Presentation**
 
-* Cute, friendly aesthetic with pastel lavender background (#e8dff5)
+* Cute, friendly aesthetic with light blue background (#d4e9ff)
+
+* Fire gradient title "🔥 TRENDING 🔥" from yellow (#FFD700) to red (#FF0000)
 
 * Rounded post cards with drop shadows and 3D highlight effects
 
 * Emojis throughout UI for playful tone:
   * Reactions: 👍 Like, ❤️ Love, 😂 Haha, 😮 Wow, 😢 Sad, 😡 Angry
   * UI elements: 📈 Engagement, ⚖️ Stability, 🎯 Phase, ⏱️ Time
-  * 🤖 indicator shows algorithm's automatic choice
-  * Verification status: ⏳ verifying, ✅ verified real, 🚨 fake news
+  * 🤖 indicator shows algorithm's automatic choice (moves when suppressing)
+  * Player actions: ✅ promote overlay, 🚫 suppress overlay
+  * Verification status: ⏳ verifying, ✅ verified real, 🚨 fake news, ❓ no time
 
 * Card colors match reaction type (blue=like, pink=love, yellow=haha, etc.)
 
 * Purple-toned text for readability on light background
+
+* Stability guide showing reaction ranking above controls
 
 * Rounded pill-shaped buttons on menus
 
