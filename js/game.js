@@ -533,6 +533,7 @@ function createPostCard(scene, x, y, post, label) {
     // Interaction handlers
     hitbox.on('pointerdown', () => selectPost(post, container, bgGraphics, hitbox));
     hitbox.on('pointerover', () => {
+        if (container.resolved) return; // Don't show hover on resolved cards
         bgGraphics.clear();
         // Shadow
         bgGraphics.fillStyle(0x000000, 0.3);
@@ -547,6 +548,7 @@ function createPostCard(scene, x, y, post, label) {
         bgGraphics.strokeRoundedRect(-cardWidth/2, -cardHeight/2, cardWidth, cardHeight, cornerRadius);
     });
     hitbox.on('pointerout', () => {
+        if (container.resolved) return; // Don't redraw resolved cards
         if (!selectedPost || selectedPost.post !== post) {
             redrawCard(bgGraphics, cardWidth, cardHeight, cornerRadius, cardColor, false);
         }
@@ -682,6 +684,7 @@ function handleAction(action) {
             engagement += post.engagement;
             stability += post.stability;
             pair.resolved = true;
+            container.resolved = true; // Prevent pointerout from redrawing
             flashCard(container, 0x00ff88);
             updateFeed(post, postLabel, 'YOU');
             break;
@@ -697,6 +700,7 @@ function handleAction(action) {
                 flashCard(container, 0x00ff88);
             }
             pair.resolved = true;
+            container.resolved = true; // Prevent pointerout from redrawing
             break;
 
         case 'verify':
