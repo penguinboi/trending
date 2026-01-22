@@ -190,11 +190,50 @@ Win if:
 
 ### **Art & Presentation**
 
-* Clean UI with paired cards, meters, timers, and alerts
+* Cute, friendly aesthetic with pastel lavender background (#e8dff5)
+
+* Rounded post cards with drop shadows and 3D highlight effects
+
+* Emojis throughout UI for playful tone:
+  * Content types: 📰 Neutral, ✨ Positive, 🔥 Viral, ⚡ Controversial, 🚨 Fake News
+  * UI elements: 📈 Engagement, ⚖️ Stability, 🎯 Phase, ⏱️ Time
+  * 🤖 indicator shows algorithm's automatic choice
+
+* Purple-toned text for readability on light background
+
+* Rounded pill-shaped buttons on menus
 
 * Abstract icons and fictional language
 
 * No real-world brands, people, or events
+
+---
+
+### **Sound Design**
+
+* Current build: No audio (silent gameplay)
+
+* Future consideration: UI feedback sounds for selections and decisions
+
+* Ambient tone to build tension as phases progress
+
+* Audio cues when posts enter decision zone
+
+---
+
+### **Technical Requirements**
+
+* **Engine:** Phaser 3.80.1 (loaded via CDN)
+
+* **Platform:** Browser-based (HTML5 Canvas)
+
+* **Resolution:** 1280x720 with retina display support
+
+* **Target:** itch.io embed
+
+* **Dependencies:** None beyond Phaser CDN
+
+* **Input:** Mouse/touch (click to select, keyboard P/S/V for actions)
 
 ---
 
