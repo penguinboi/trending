@@ -209,31 +209,41 @@ function create() {
     startOverlay = this.add.container(640, 360);
     startOverlay.setDepth(1001);
 
-    const startBg = this.add.rectangle(0, 0, 1280, 720, 0x1a1a2e, 0.95);
+    const startBg = this.add.rectangle(0, 0, 1280, 720, 0x1a1a2e, 1);
     startOverlay.add(startBg);
 
-    const startTitle = this.add.text(0, -120, 'TRENDING', {
+    const startTitle = this.add.text(0, -260, 'TRENDING', {
         fontSize: '72px',
         fill: '#ffffff',
         fontStyle: 'bold'
     }).setOrigin(0.5);
     startOverlay.add(startTitle);
 
-    const startTagline = this.add.text(0, -50, 'The world sees what you choose to show', {
-        fontSize: '20px',
-        fill: '#6a6a8a',
-        fontStyle: 'italic'
-    }).setOrigin(0.5);
-    startOverlay.add(startTagline);
-
-    const startInstructions = this.add.text(0, 30, 'You are the content moderator.\nThe algorithm promotes engagement. You promote stability.\nClick posts to select, then [P] Promote | [S] Suppress | [V] Verify', {
+    const introText = this.add.text(0, -60,
+        'Welcome to your first day as Content Moderator at TrendNet.\n\n' +
+        'Our algorithm is designed to maximize engagement.\n' +
+        'It promotes whatever gets clicks — viral content, controversy, even misinformation.\n\n' +
+        'Your job is to be the human in the loop.\n' +
+        'Review content before it trends. Promote truth. Suppress lies.\n' +
+        'But be careful — suppress too much valid content and users will revolt.\n\n' +
+        'The board wants growth. Society needs stability.\n' +
+        'You have 10 minutes to prove you can balance both.\n\n' +
+        'The world is watching.', {
         fontSize: '16px',
-        fill: '#888888',
+        fill: '#aaaaaa',
+        align: 'center',
+        lineSpacing: 6
+    }).setOrigin(0.5);
+    startOverlay.add(introText);
+
+    const controlsText = this.add.text(0, 170, '[P] Promote  |  [S] Suppress  |  [V] Verify', {
+        fontSize: '14px',
+        fill: '#666666',
         align: 'center'
     }).setOrigin(0.5);
-    startOverlay.add(startInstructions);
+    startOverlay.add(controlsText);
 
-    const startButtonBg = this.add.rectangle(0, 140, 200, 60, 0x48bb78, 1);
+    const startButtonBg = this.add.rectangle(0, 240, 200, 60, 0x48bb78, 1);
     startButtonBg.setStrokeStyle(2, 0xffffff, 0.5);
     startButtonBg.setInteractive({ useHandCursor: true });
     startButtonBg.on('pointerover', () => startButtonBg.setFillStyle(0x68db98, 1));
@@ -241,8 +251,8 @@ function create() {
     startButtonBg.on('pointerdown', () => startGame());
     startOverlay.add(startButtonBg);
 
-    const startButtonText = this.add.text(0, 140, 'START', {
-        fontSize: '28px',
+    const startButtonText = this.add.text(0, 240, 'BEGIN SHIFT', {
+        fontSize: '24px',
         fill: '#ffffff',
         fontStyle: 'bold'
     }).setOrigin(0.5);
