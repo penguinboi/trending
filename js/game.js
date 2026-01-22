@@ -123,14 +123,14 @@ function create() {
     currentScene = this;
 
     // Game title
-    this.add.text(640, 25, 'TRENDING', {
+    this.add.text(640, 25, '📱 TRENDING 📱', {
         fontSize: '48px',
         fill: '#5a3d7a',
         fontStyle: 'bold'
     }).setOrigin(0.5);
 
     // Tagline
-    this.add.text(640, 60, 'The world sees what you choose to show', {
+    this.add.text(640, 60, '🌍 The world sees what you choose to show 👀', {
         fontSize: '16px',
         fill: '#7a6a9a',
         fontStyle: 'italic'
@@ -141,7 +141,7 @@ function create() {
     decisionZone.setStrokeStyle(2, 0x4a4a6a);
 
     // Decision zone label
-    this.add.text(1100, 80, 'DECISION\nZONE', {
+    this.add.text(1100, 80, '⚠️ DECISION\nZONE ⚠️', {
         fontSize: '16px',
         fill: '#7a6a9a',
         align: 'center'
@@ -156,23 +156,23 @@ function create() {
     }
 
     // UI: Engagement meter
-    this.add.text(20, 20, 'User Engagement', { fontSize: '14px', fill: '#6a5a8a' });
+    this.add.text(20, 20, '📈 User Engagement', { fontSize: '14px', fill: '#6a5a8a' });
     engagementText = this.add.text(20, 40, '0', { fontSize: '28px', fill: '#00aa66' });
 
     // UI: Stability meter
-    this.add.text(20, 70, 'Global Stability', { fontSize: '14px', fill: '#6a5a8a' });
+    this.add.text(20, 70, '⚖️ Global Stability', { fontSize: '14px', fill: '#6a5a8a' });
     stabilityText = this.add.text(20, 88, '100%', { fontSize: '24px', fill: '#cc8800' });
 
     // UI: Phase indicator
-    this.add.text(20, 120, 'Phase', { fontSize: '14px', fill: '#6a5a8a' });
+    this.add.text(20, 120, '🎯 Phase', { fontSize: '14px', fill: '#6a5a8a' });
     phaseText = this.add.text(20, 138, '1 / 10', { fontSize: '24px', fill: '#8866cc' });
 
     // UI: Timer
-    this.add.text(20, 170, 'Time Left in Term', { fontSize: '14px', fill: '#6a5a8a' });
+    this.add.text(20, 170, '⏱️ Time Left', { fontSize: '14px', fill: '#6a5a8a' });
     timerText = this.add.text(20, 188, '10:00', { fontSize: '24px', fill: '#5a3d7a' });
 
     // UI: Feed display (shows last promoted content and effects)
-    this.add.text(640, 570, 'PROMOTED TO FEED', { fontSize: '12px', fill: '#7a6a9a' }).setOrigin(0.5);
+    this.add.text(640, 570, '📣 PROMOTED TO FEED 📣', { fontSize: '12px', fill: '#7a6a9a' }).setOrigin(0.5);
 
     feedContainer = this.add.container(640, 610);
 
@@ -193,7 +193,7 @@ function create() {
     feedContainer.add(feedSourceText);
 
     // UI: Instructions
-    this.add.text(640, 680, 'Click on a post before it leaves the Decision Zone to select it. Press [P] Promote | [S] Suppress | [V] Verify', {
+    this.add.text(640, 680, '👆 Click a post to select it! [P] ✅ Promote | [S] 🚫 Suppress | [V] 🔍 Verify', {
         fontSize: '14px',
         fill: '#7a6a9a',
         align: 'center'
@@ -212,7 +212,7 @@ function create() {
     const overlay = this.add.rectangle(0, 0, 1280, 720, 0x000000, 0.85);
     gameOverOverlay.add(overlay);
 
-    gameOverText = this.add.text(0, -80, 'GAME OVER', {
+    gameOverText = this.add.text(0, -80, '🎬 GAME OVER 🎬', {
         fontSize: '64px',
         fill: '#ff4444',
         fontStyle: 'bold'
@@ -253,7 +253,7 @@ function create() {
     playAgainHitbox.on('pointerdown', () => resetGame());
     gameOverOverlay.add(playAgainHitbox);
 
-    playAgainButton = this.add.text(0, 160, '🔄 PLAY AGAIN', {
+    playAgainButton = this.add.text(0, 160, '🔄 PLAY AGAIN 🎮', {
         fontSize: '20px',
         fill: '#ffffff',
         fontStyle: 'bold'
@@ -267,7 +267,7 @@ function create() {
     const startBg = this.add.rectangle(0, 0, 1280, 720, 0xe8dff5, 1);
     startOverlay.add(startBg);
 
-    const startTitle = this.add.text(0, -260, 'TRENDING', {
+    const startTitle = this.add.text(0, -260, '📱 TRENDING 📱', {
         fontSize: '72px',
         fill: '#5a3d7a',
         fontStyle: 'bold'
@@ -275,15 +275,15 @@ function create() {
     startOverlay.add(startTitle);
 
     const introText = this.add.text(0, -60,
-        'Welcome to your first day as Content Moderator at TrendNet.\n\n' +
-        'Our algorithm is designed to maximize engagement.\n' +
+        '👋 Welcome to your first day as Content Moderator at TrendNet!\n\n' +
+        '🤖 Our algorithm is designed to maximize engagement.\n' +
         'It promotes whatever gets clicks — viral content, controversy, even misinformation.\n\n' +
-        'Your job is to be the human in the loop.\n' +
+        '🧠 Your job is to be the human in the loop.\n' +
         'Review content before it trends. Promote truth. Suppress lies.\n' +
-        'But be careful — suppress too much valid content and users will revolt.\n\n' +
-        'The board wants growth. Society needs stability.\n' +
-        'You have 10 minutes to prove you can balance both.\n\n' +
-        'The world is watching.', {
+        '⚠️ But be careful — suppress too much valid content and users will revolt!\n\n' +
+        '📊 The board wants growth. Society needs stability.\n' +
+        '⏱️ You have 10 minutes to prove you can balance both.\n\n' +
+        '🌍 The world is watching. 👀', {
         fontSize: '16px',
         fill: '#4a4a6a',
         align: 'center',
@@ -291,7 +291,7 @@ function create() {
     }).setOrigin(0.5);
     startOverlay.add(introText);
 
-    const controlsText = this.add.text(0, 170, '🎮  [P] Promote  |  [S] Suppress  |  [V] Verify', {
+    const controlsText = this.add.text(0, 170, '🎮  [P] ✅ Promote  |  [S] 🚫 Suppress  |  [V] 🔍 Verify', {
         fontSize: '14px',
         fill: '#6a5a8a',
         align: 'center'
@@ -325,7 +325,7 @@ function create() {
     startHitbox.on('pointerdown', () => startGame());
     startOverlay.add(startHitbox);
 
-    const startButtonText = this.add.text(0, 240, '▶ BEGIN SHIFT', {
+    const startButtonText = this.add.text(0, 240, '🚀 BEGIN SHIFT', {
         fontSize: '22px',
         fill: '#ffffff',
         fontStyle: 'bold'
@@ -342,12 +342,12 @@ function update(time, delta) {
 
     // Check loss conditions
     if (stability <= 0) {
-        triggerGameOver('SOCIETAL COLLAPSE', 'The world has become divided and unstable.\nYour platform accelerated the fracturing of society.');
+        triggerGameOver('💔 SOCIETAL COLLAPSE 💔', '😰 The world has become divided and unstable.\nYour platform accelerated the fracturing of society.');
         return;
     }
 
     if (gameTimer >= GAME_DURATION) {
-        triggerGameOver('TERM COMPLETED', 'You survived your term as content moderator.\nThe world kept watching... for now.');
+        triggerGameOver('🎉 TERM COMPLETED! 🎉', '✨ You survived your term as content moderator!\n🌍 The world kept watching... for now. 👀');
         return;
     }
 
