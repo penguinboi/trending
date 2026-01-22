@@ -42,12 +42,18 @@ let stability = 100;
 let selectedPost = null;
 let gameOver = false;
 let gameOverReason = '';
+let gameStarted = false;
+let currentScene = null;
+
+// Start screen UI
+let startOverlay;
 
 // Game over UI
 let gameOverOverlay;
 let gameOverText;
 let gameOverSubtext;
 let finalStatsText;
+let playAgainButton;
 
 // UI elements
 let engagementText;
@@ -70,6 +76,9 @@ let feedStabText;
 let feedSourceText;
 
 function create() {
+    // Store scene reference for reset functionality
+    currentScene = this;
+
     // Game title
     this.add.text(640, 25, 'TRENDING', {
         fontSize: '48px',
@@ -152,8 +161,9 @@ function create() {
     this.input.keyboard.on('keydown-S', () => handleAction('suppress'));
     this.input.keyboard.on('keydown-V', () => handleAction('verify'));
 
-    // Game over overlay (hidden initially)
+    // Game over overlay (hidden initially, high depth to render above posts)
     gameOverOverlay = this.add.container(640, 360);
+    gameOverOverlay.setDepth(1000);
     gameOverOverlay.setVisible(false);
 
     const overlay = this.add.rectangle(0, 0, 1280, 720, 0x000000, 0.85);
@@ -179,11 +189,70 @@ function create() {
     }).setOrigin(0.5);
     gameOverOverlay.add(finalStatsText);
 
-    // Spawn initial post pair
-    spawnPostPair(this);
+    // Play again button
+    const playAgainBg = this.add.rectangle(0, 160, 200, 50, 0x4a4a6a, 1);
+    playAgainBg.setStrokeStyle(2, 0xffffff, 0.5);
+    playAgainBg.setInteractive({ useHandCursor: true });
+    playAgainBg.on('pointerover', () => playAgainBg.setFillStyle(0x6a6a8a, 1));
+    playAgainBg.on('pointerout', () => playAgainBg.setFillStyle(0x4a4a6a, 1));
+    playAgainBg.on('pointerdown', () => resetGame());
+    gameOverOverlay.add(playAgainBg);
+
+    playAgainButton = this.add.text(0, 160, 'PLAY AGAIN', {
+        fontSize: '24px',
+        fill: '#ffffff',
+        fontStyle: 'bold'
+    }).setOrigin(0.5);
+    gameOverOverlay.add(playAgainButton);
+
+    // Start screen overlay (high depth, shown initially)
+    startOverlay = this.add.container(640, 360);
+    startOverlay.setDepth(1001);
+
+    const startBg = this.add.rectangle(0, 0, 1280, 720, 0x1a1a2e, 0.95);
+    startOverlay.add(startBg);
+
+    const startTitle = this.add.text(0, -120, 'TRENDING', {
+        fontSize: '72px',
+        fill: '#ffffff',
+        fontStyle: 'bold'
+    }).setOrigin(0.5);
+    startOverlay.add(startTitle);
+
+    const startTagline = this.add.text(0, -50, 'The world sees what you choose to show', {
+        fontSize: '20px',
+        fill: '#6a6a8a',
+        fontStyle: 'italic'
+    }).setOrigin(0.5);
+    startOverlay.add(startTagline);
+
+    const startInstructions = this.add.text(0, 30, 'You are the content moderator.\nThe algorithm promotes engagement. You promote stability.\nClick posts to select, then [P] Promote | [S] Suppress | [V] Verify', {
+        fontSize: '16px',
+        fill: '#888888',
+        align: 'center'
+    }).setOrigin(0.5);
+    startOverlay.add(startInstructions);
+
+    const startButtonBg = this.add.rectangle(0, 140, 200, 60, 0x48bb78, 1);
+    startButtonBg.setStrokeStyle(2, 0xffffff, 0.5);
+    startButtonBg.setInteractive({ useHandCursor: true });
+    startButtonBg.on('pointerover', () => startButtonBg.setFillStyle(0x68db98, 1));
+    startButtonBg.on('pointerout', () => startButtonBg.setFillStyle(0x48bb78, 1));
+    startButtonBg.on('pointerdown', () => startGame());
+    startOverlay.add(startButtonBg);
+
+    const startButtonText = this.add.text(0, 140, 'START', {
+        fontSize: '28px',
+        fill: '#ffffff',
+        fontStyle: 'bold'
+    }).setOrigin(0.5);
+    startOverlay.add(startButtonText);
 }
 
 function update(time, delta) {
+    // Don't run game logic until started
+    if (!gameStarted) return;
+
     // Check for game over
     if (gameOver) return;
 
@@ -511,4 +580,46 @@ function getTypeColorHex(type) {
         'fake news': '#e53e3e'
     };
     return colors[type] || '#4a5568';
+}
+
+function startGame() {
+    gameStarted = true;
+    startOverlay.setVisible(false);
+    spawnPostPair(currentScene);
+}
+
+function resetGame() {
+    // Clear existing post pairs
+    for (const pair of postPairs) {
+        pair.container.destroy();
+    }
+    postPairs = [];
+
+    // Reset game state
+    gameTimer = 0;
+    currentPhase = 0;
+    beltSpeed = PHASE_SPEEDS[0];
+    spawnTimer = 0;
+    engagement = 0;
+    stability = 100;
+    selectedPost = null;
+    gameOver = false;
+    gameOverReason = '';
+
+    // Reset UI
+    engagementText.setText('0');
+    stabilityText.setText('100%');
+    stabilityText.setFill('#00ff88');
+    phaseText.setText('1 / 10');
+    timerText.setText('10:00');
+    feedTypeText.setText('—');
+    feedTypeText.setFill('#888');
+    feedEngText.setText('');
+    feedStabText.setText('');
+    feedSourceText.setText('');
+
+    // Hide game over, show start screen
+    gameOverOverlay.setVisible(false);
+    startOverlay.setVisible(true);
+    gameStarted = false;
 }
