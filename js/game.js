@@ -9,7 +9,7 @@ const config = {
     width: 1280,
     height: 720,
     parent: 'game-container',
-    backgroundColor: '#e8dff5',
+    backgroundColor: '#d4e9ff',
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
@@ -56,6 +56,42 @@ function createRoundedRect(scene, x, y, width, height, radius, fillColor, fillAl
     return graphics;
 }
 
+// Helper to create fire gradient title text
+function createFireTitle(scene, x, y, fontSize) {
+    const container = scene.add.container(x, y);
+    const letters = 'TRENDING'.split('');
+    const colors = ['#FFD700', '#FFCC00', '#FFB300', '#FF9900', '#FF7700', '#FF5500', '#FF3300', '#FF0000'];
+
+    // Calculate total width for centering
+    const letterSpacing = fontSize * 0.65;
+    const totalWidth = letters.length * letterSpacing;
+    const startX = -totalWidth / 2 + letterSpacing / 2;
+
+    // Add left fire emoji
+    const leftFire = scene.add.text(startX - letterSpacing * 1.2, 0, '🔥', {
+        fontSize: fontSize + 'px'
+    }).setOrigin(0.5);
+    container.add(leftFire);
+
+    // Add each letter with gradient color
+    letters.forEach((letter, i) => {
+        const letterText = scene.add.text(startX + i * letterSpacing, 0, letter, {
+            fontSize: fontSize + 'px',
+            fill: colors[i],
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+        container.add(letterText);
+    });
+
+    // Add right fire emoji
+    const rightFire = scene.add.text(startX + letters.length * letterSpacing + letterSpacing * 0.2, 0, '🔥', {
+        fontSize: fontSize + 'px'
+    }).setOrigin(0.5);
+    container.add(rightFire);
+
+    return container;
+}
+
 // Vibrant color palette
 const COLORS = {
     background: 0x1a1a2e,
@@ -92,6 +128,7 @@ let currentScene = null;
 const VERIFY_DURATION = 2000; // 2 seconds to verify
 let verifyingPost = null;     // Currently verifying post
 let verifyTimer = 0;          // Time spent verifying
+let suppressionBacklash = 0;  // Tracks repeated suppression of real content
 
 // Start screen UI
 let startOverlay;
@@ -124,19 +161,22 @@ let feedStabText;
 let feedSourceText;
 let feedFakeText;
 
+// Suppressed post display
+let suppressedContainer;
+let suppressedTitleText;
+let suppressedStatusText;
+let suppressedImpactText;
+let suppressedBacklashText;
+
 function create() {
     // Store scene reference for reset functionality
     currentScene = this;
 
-    // Game title
-    this.add.text(640, 25, '🔥 TRENDING 🔥', {
-        fontSize: '53px',
-        fill: '#5a3d7a',
-        fontStyle: 'bold'
-    }).setOrigin(0.5).setDepth(100);
+    // Game title with fire gradient
+    createFireTitle(this, 640, 25, 53).setDepth(100);
 
     // Tagline
-    this.add.text(640, 60, '🌍 The world sees what you choose to show 👀', {
+    this.add.text(640, 60, '🌍 Choose what the world sees 👀', {
         fontSize: '18px',
         fill: '#7a6a9a',
         fontStyle: 'italic'
@@ -174,9 +214,9 @@ function create() {
     timerText = this.add.text(20, 110, '⏱️ Time Left - 10:00', { fontSize: '22px', fill: '#5a3d7a' }).setDepth(100);
 
     // UI: Feed display (shows last promoted content and effects)
-    this.add.text(640, 570, '📣 PROMOTED TO FEED 📣', { fontSize: '13px', fill: '#7a6a9a' }).setOrigin(0.5).setDepth(100);
+    this.add.text(640, 530, '📣 Last Post Promoted to 🔥Wildfire Social Feed 📣', { fontSize: '13px', fill: '#7a6a9a' }).setOrigin(0.5).setDepth(100);
 
-    feedContainer = this.add.container(640, 610);
+    feedContainer = this.add.container(640, 570);
     feedContainer.setDepth(100);
 
     feedTypeText = this.add.text(0, 0, '—', {
@@ -198,9 +238,41 @@ function create() {
     feedFakeText = this.add.text(0, 55, '', { fontSize: '14px', fill: '#cc4444', fontStyle: 'bold' }).setOrigin(0.5);
     feedContainer.add(feedFakeText);
 
+    // UI: Suppressed post display (shows last suppressed post and impact)
+    this.add.text(150, 530, '🚫 LAST SUPPRESSED 🚫', { fontSize: '13px', fill: '#7a6a9a' }).setOrigin(0.5).setDepth(100);
+
+    suppressedContainer = this.add.container(150, 570);
+    suppressedContainer.setDepth(100);
+
+    suppressedStatusText = this.add.text(0, 0, '—', {
+        fontSize: '18px',
+        fill: '#6a5a8a',
+        fontStyle: 'bold'
+    }).setOrigin(0.5);
+    suppressedContainer.add(suppressedStatusText);
+
+    suppressedImpactText = this.add.text(0, 25, '', {
+        fontSize: '14px',
+        fill: '#228833'
+    }).setOrigin(0.5);
+    suppressedContainer.add(suppressedImpactText);
+
+    suppressedBacklashText = this.add.text(0, 45, '', {
+        fontSize: '12px',
+        fill: '#cc4444'
+    }).setOrigin(0.5);
+    suppressedContainer.add(suppressedBacklashText);
+
+    // UI: Stability guide
+    this.add.text(640, 650, 'Stability: ❤️++ > 😂+ > 👍 😮 neutral > 😢- > 😡--', {
+        fontSize: '13px',
+        fill: '#6a5a8a',
+        align: 'center'
+    }).setOrigin(0.5).setDepth(100);
+
     // UI: Instructions
-    this.add.text(640, 680, '👆 Click to select | [P] ✅ Promote | [S] 🚫 Suppress | [V] 🔍 Verify | 🤖 = Algorithm\'s pick', {
-        fontSize: '15px',
+    this.add.text(640, 670, '👆 Click to select | [P] ✅ Promote (1.25x!) | [S] 🚫 Suppress | [V] 🔍 Verify | 🤖 = Algorithm\'s pick', {
+        fontSize: '13px',
         fill: '#7a6a9a',
         align: 'center'
     }).setOrigin(0.5).setDepth(100);
@@ -270,14 +342,10 @@ function create() {
     startOverlay = this.add.container(640, 360);
     startOverlay.setDepth(1001);
 
-    const startBg = this.add.rectangle(0, 0, 1280, 720, 0xe8dff5, 1);
+    const startBg = this.add.rectangle(0, 0, 1280, 720, 0xd4e9ff, 1);
     startOverlay.add(startBg);
 
-    const startTitle = this.add.text(0, -290, '🔥 TRENDING 🔥', {
-        fontSize: '79px',
-        fill: '#5a3d7a',
-        fontStyle: 'bold'
-    }).setOrigin(0.5);
+    const startTitle = createFireTitle(this, 0, -290, 79);
     startOverlay.add(startTitle);
 
     const startSubtitle = this.add.text(0, -210, 'The Content Moderator Game', {
@@ -305,9 +373,9 @@ function create() {
         '🤖 Our algorithm is designed to maximize engagement.\n' +
         'It promotes whatever gets clicks — viral content, controversy, even misinformation.\n\n' +
         'Your job is to be the human in the loop.\n' +
-        'Review content before it trends. Promote truth. Suppress lies.\n' +
+        'Review content before it trends. Promote truth. Suppress fake news.\n' +
         'But be careful — suppress too much valid content and users will revolt!\n\n' +
-        'The board wants growth. Society needs stability.\n' +
+        'Our investors want more growth which means more engagement. Society needs stability.\n' +
         'You have 10 minutes to prove you can balance both.\n\n' +
         '🌍 The world is watching. 👀', {
         fontSize: '18px',
@@ -316,20 +384,6 @@ function create() {
         lineSpacing: 7
     }).setOrigin(0.5);
     startOverlay.add(introText);
-
-    const controlsHeader = this.add.text(0, 200, '🎮 Controls', {
-        fontSize: '16px',
-        fill: '#5a3d7a',
-        fontStyle: 'bold'
-    }).setOrigin(0.5);
-    startOverlay.add(controlsHeader);
-
-    const controlsText = this.add.text(0, 225, '[P] ✅ Promote  |  [S] 🚫 Suppress  |  [V] 🔍 Verify', {
-        fontSize: '15px',
-        fill: '#6a5a8a',
-        align: 'center'
-    }).setOrigin(0.5);
-    startOverlay.add(controlsText);
 
     // Start button with rounded corners
     const startButtonGraphics = this.add.graphics();
@@ -415,6 +469,17 @@ function update(time, delta) {
                 redrawCardWarning(pair.cardA.bg, pair.cardA.cardWidth, pair.cardA.cardHeight, pair.cardA.cornerRadius, pair.cardA.cardColor);
                 redrawCardWarning(pair.cardB.bg, pair.cardB.cardWidth, pair.cardB.cardHeight, pair.cardB.cornerRadius, pair.cardB.cardColor);
             }
+        }
+
+        // Cancel verification if post is about to exit (not enough time)
+        if (pair.x > 1150 && verifyingPost && verifyingPost.pair === pair) {
+            // Show cancelled state on the card
+            if (verifyingPost.container.verifyText) {
+                verifyingPost.container.verifyText.setText('❓ NO TIME');
+                verifyingPost.container.verifyText.setBackgroundColor('#666666');
+            }
+            verifyingPost = null;
+            verifyTimer = 0;
         }
 
         // Check if pair has exited decision zone (algorithm decides)
@@ -507,7 +572,8 @@ function spawnPostPair(scene) {
     container.add(vs);
 
     // Algorithm choice indicator (shows which post the algorithm will pick)
-    const algoChoice = postA.engagement >= postB.engagement ? cardA : cardB;
+    const algoChoiceIsA = postA.engagement >= postB.engagement;
+    const algoChoice = algoChoiceIsA ? cardA : cardB;
     const algoIndicator = scene.add.text(70, -40, '🤖', {
         fontSize: '18px'
     });
@@ -521,6 +587,8 @@ function spawnPostPair(scene) {
         postB: postB,
         cardA: cardA,
         cardB: cardB,
+        algoIndicator: algoIndicator,
+        algoOnA: algoChoiceIsA,
         resolved: false
     };
 
@@ -764,7 +832,9 @@ function handleAction(action) {
 
     switch (action) {
         case 'promote':
-            engagement += post.engagement;
+            // Player promotion gets 1.25x impact on both engagement and stability
+            const engEffect = Math.floor(post.engagement * 1.25);
+            engagement += engEffect;
             // Fake news has worse stability impact
             let stabEffect = post.stability;
             if (post.isFakeNews) {
@@ -774,23 +844,35 @@ function handleAction(action) {
                     stabEffect = stabEffect * 2; // Negative is doubled
                 }
             }
+            stabEffect = Math.floor(stabEffect * 1.25);
             stability += stabEffect;
             pair.resolved = true;
             container.resolved = true;
             flashCard(container, 0x00ff88);
-            updateFeed(post, postLabel, 'YOU', stabEffect);
+            // Add large checkmark over the post
+            const checkSign = container.scene.add.text(0, 0, '✅', {
+                fontSize: '80px'
+            }).setOrigin(0.5);
+            container.add(checkSign);
+            updateFeed(post, postLabel, 'YOU', stabEffect, engEffect);
             break;
 
         case 'suppress':
+            let suppressImpact;
             if (!post.isFakeNews) {
-                // Suppressing real content causes backlash
-                stability -= 3;
+                // Suppressing real content causes escalating backlash
+                suppressionBacklash++;
+                suppressImpact = -suppressionBacklash; // -1, -2, -3, etc.
+                stability += suppressImpact;
                 flashCard(container, 0xff4444);
             } else {
                 // Suppressing fake news is good
-                stability += 1;
+                suppressImpact = 1;
+                stability += suppressImpact;
                 flashCard(container, 0x00ff88);
             }
+            // Update suppressed post display
+            updateSuppressedDisplay(post, suppressImpact);
             // Mark post as suppressed (algorithm will choose the other post)
             post.suppressed = true;
             container.resolved = true;
@@ -799,9 +881,25 @@ function handleAction(action) {
                 fontSize: '80px'
             }).setOrigin(0.5);
             container.add(noSign);
-            // If both posts suppressed, resolve the pair with no promotion
+            // Update robot indicator to show new algorithm choice
             if (pair.postA.suppressed && pair.postB.suppressed) {
+                // Both suppressed - hide indicator
+                pair.algoIndicator.setVisible(false);
                 pair.resolved = true;
+            } else if (pair.postA.suppressed && !pair.postB.suppressed) {
+                // A suppressed - move indicator to B
+                if (pair.algoOnA) {
+                    pair.cardA.remove(pair.algoIndicator);
+                    pair.cardB.add(pair.algoIndicator);
+                    pair.algoOnA = false;
+                }
+            } else if (pair.postB.suppressed && !pair.postA.suppressed) {
+                // B suppressed - move indicator to A
+                if (!pair.algoOnA) {
+                    pair.cardB.remove(pair.algoIndicator);
+                    pair.cardA.add(pair.algoIndicator);
+                    pair.algoOnA = true;
+                }
             }
             break;
 
@@ -881,17 +979,18 @@ function algorithmDecides(pair) {
     updateFeed(chosen, chosenLabel, 'ALGORITHM', stabEffect);
 }
 
-function updateFeed(post, label, source, actualStability) {
-    // Use actual stability effect if provided (accounts for fake news penalty)
+function updateFeed(post, label, source, actualStability, actualEngagement) {
+    // Use actual values if provided (accounts for player 1.25x bonus and fake news penalty)
     const stabEffect = actualStability !== undefined ? actualStability : post.stability;
+    const engEffect = actualEngagement !== undefined ? actualEngagement : post.engagement;
 
     // Update feed with reaction emoji and label
     feedTypeText.setText(`Post ${label}: ${post.emoji}`);
     feedTypeText.setFill(getReactionColorHex(post.reaction));
 
     // Show engagement change
-    const engSign = post.engagement >= 0 ? '+' : '';
-    feedEngText.setText(`Engagement: ${engSign}${post.engagement}`);
+    const engSign = engEffect >= 0 ? '+' : '';
+    feedEngText.setText(`Engagement: ${engSign}${engEffect}`);
     feedEngText.setFill('#228833');
 
     // Show stability change (revealed after promotion, includes fake news penalty)
@@ -910,6 +1009,29 @@ function updateFeed(post, label, source, actualStability) {
     } else {
         feedFakeText.setText('✅ VERIFIED REAL');
         feedFakeText.setFill('#228833');
+    }
+}
+
+function updateSuppressedDisplay(post, impact) {
+    // Show whether the suppressed post was fake or real
+    if (post.isFakeNews) {
+        suppressedStatusText.setText('🚨 Was FAKE NEWS');
+        suppressedStatusText.setFill('#228833'); // Green - good decision
+    } else {
+        suppressedStatusText.setText('❌ Was REAL content');
+        suppressedStatusText.setFill('#cc4444'); // Red - bad decision
+    }
+
+    // Show the stability impact
+    const sign = impact >= 0 ? '+' : '';
+    suppressedImpactText.setText(`Stability: ${sign}${impact}`);
+    suppressedImpactText.setFill(impact >= 0 ? '#228833' : '#cc4444');
+
+    // Show current backlash level
+    if (suppressionBacklash > 0) {
+        suppressedBacklashText.setText(`⚠️ Censorship Backlash: ${suppressionBacklash}`);
+    } else {
+        suppressedBacklashText.setText('');
     }
 }
 
@@ -963,6 +1085,7 @@ function resetGame() {
     gameOverReason = '';
     verifyingPost = null;
     verifyTimer = 0;
+    suppressionBacklash = 0;
 
     // Reset UI
     engagementText.setText('📈 User Engagement - 0');
@@ -976,6 +1099,10 @@ function resetGame() {
     feedStabText.setText('');
     feedSourceText.setText('');
     feedFakeText.setText('');
+    suppressedStatusText.setText('—');
+    suppressedStatusText.setFill('#6a5a8a');
+    suppressedImpactText.setText('');
+    suppressedBacklashText.setText('');
 
     // Hide game over, show start screen
     gameOverOverlay.setVisible(false);
