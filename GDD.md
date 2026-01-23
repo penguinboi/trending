@@ -38,7 +38,7 @@ If you do nothing, the algorithm decides.
 
 2. A countdown timer begins
 
-3. Player may Verify, Limit, or Suppress posts
+3. Player may Verify, Promote, or Suppress posts
 
 4. Any unresolved pair defaults to the algorithm’s choice
 
@@ -46,9 +46,9 @@ If you do nothing, the algorithm decides.
 
 6. Social Stability shifts over time
 
-7. World conditions affect future rounds
+7. World conditions affect future rounds (NOT IMPLEMENTED)
 
-One decision cycle every \~10 seconds.
+Decision cycles vary by phase (~7s in phase 1, ~0.6s in phase 10).
 
 ---
 
@@ -193,7 +193,7 @@ Lose if:
 
 * Social Stability reaches zero (societal collapse)
 
-* Engagement remains below rising targets too long
+* Engagement remains below rising targets too long (NOT IMPLEMENTED)
 
 Win if:
 
