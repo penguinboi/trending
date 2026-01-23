@@ -69,7 +69,8 @@ function createFireTitle(scene, x, y, fontSize) {
 
     // Add left fire emoji
     const leftFire = scene.add.text(startX - letterSpacing * 1.2, 0, '🔥', {
-        fontSize: fontSize + 'px'
+        fontSize: fontSize + 'px',
+        padding: { x: 10, y: 10 }
     }).setOrigin(0.5);
     container.add(leftFire);
 
@@ -85,7 +86,8 @@ function createFireTitle(scene, x, y, fontSize) {
 
     // Add right fire emoji
     const rightFire = scene.add.text(startX + letters.length * letterSpacing + letterSpacing * 0.2, 0, '🔥', {
-        fontSize: fontSize + 'px'
+        fontSize: fontSize + 'px',
+        padding: { x: 10, y: 10 }
     }).setOrigin(0.5);
     container.add(rightFire);
 
@@ -173,14 +175,22 @@ function create() {
     currentScene = this;
 
     // Game title with fire gradient
-    createFireTitle(this, 640, 25, 53).setDepth(100);
+    createFireTitle(this, 640, 40, 53).setDepth(100);
 
-    // Tagline
-    this.add.text(640, 60, '🌍 Choose what the world sees 👀', {
+    // Tagline (emojis as separate elements with left-anchor to prevent cutoff)
+    this.add.text(455, 95, '🌍', {
+        fontSize: '18px',
+        padding: { left: 20, right: 10, top: 10, bottom: 10 }
+    }).setOrigin(0, 0.5).setDepth(100);
+    this.add.text(640, 95, 'Choose what the world sees', {
         fontSize: '18px',
         fill: '#7a6a9a',
         fontStyle: 'italic'
     }).setOrigin(0.5).setDepth(100);
+    this.add.text(780, 95, '👀', {
+        fontSize: '18px',
+        padding: { x: 10, y: 10 }
+    }).setOrigin(0, 0.5).setDepth(100);
 
     // Decision zone (right side of screen)
     decisionZone = this.add.rectangle(1100, 360, 200, 600, 0x2d2d4a, 0.3);
@@ -190,7 +200,8 @@ function create() {
     this.add.text(1100, 80, '⚠️ DECISION ZONE ⚠️', {
         fontSize: '14px',
         fill: '#7a6a9a',
-        align: 'center'
+        align: 'center',
+        padding: { x: 4, y: 4 }
     }).setOrigin(0.5).setDepth(100);
 
     // Belt track
@@ -202,19 +213,19 @@ function create() {
     }
 
     // UI: Engagement meter (depth 100 keeps UI above posts)
-    engagementText = this.add.text(20, 20, '📈 User Engagement - 0', { fontSize: '22px', fill: '#00aa66' }).setDepth(100);
+    engagementText = this.add.text(20, 20, '📈 User Engagement - 0', { fontSize: '22px', fill: '#00aa66', padding: { x: 4, y: 4 } }).setDepth(100);
 
     // UI: Stability meter
-    stabilityText = this.add.text(20, 50, '⚖️ Global Stability - 100%', { fontSize: '22px', fill: '#228833' }).setDepth(100);
+    stabilityText = this.add.text(20, 50, '⚖️ Global Stability - 100%', { fontSize: '22px', fill: '#228833', padding: { x: 4, y: 4 } }).setDepth(100);
 
     // UI: Phase indicator
-    phaseText = this.add.text(20, 80, '🎯 Phase - 1 / 10', { fontSize: '22px', fill: '#8866cc' }).setDepth(100);
+    phaseText = this.add.text(20, 80, '🎯 Phase - 1 / 10', { fontSize: '22px', fill: '#8866cc', padding: { x: 4, y: 4 } }).setDepth(100);
 
     // UI: Timer
-    timerText = this.add.text(20, 110, '⏱️ Time Left - 10:00', { fontSize: '22px', fill: '#5a3d7a' }).setDepth(100);
+    timerText = this.add.text(20, 110, '⏱️ Time Left - 10:00', { fontSize: '22px', fill: '#5a3d7a', padding: { x: 4, y: 4 } }).setDepth(100);
 
     // UI: Feed display (shows last promoted content and effects)
-    this.add.text(640, 530, '📣 Last Post Promoted to 🔥Wildfire Social Feed 📣', { fontSize: '13px', fill: '#7a6a9a' }).setOrigin(0.5).setDepth(100);
+    this.add.text(640, 530, '📣 Last Post Promoted to 🔥Wildfire Social Feed 📣', { fontSize: '13px', fill: '#7a6a9a', padding: { x: 4, y: 4 } }).setOrigin(0.5).setDepth(100);
 
     feedContainer = this.add.container(640, 570);
     feedContainer.setDepth(100);
@@ -222,24 +233,25 @@ function create() {
     feedTypeText = this.add.text(0, 0, '—', {
         fontSize: '22px',
         fill: '#6a5a8a',
-        fontStyle: 'bold'
+        fontStyle: 'bold',
+        padding: { x: 4, y: 4 }
     }).setOrigin(0.5);
     feedContainer.add(feedTypeText);
 
-    feedEngText = this.add.text(-170, 30, '', { fontSize: '16px', fill: '#228833' }).setOrigin(0.5);
+    feedEngText = this.add.text(-250, 30, '', { fontSize: '16px', fill: '#228833' }).setOrigin(0.5);
     feedContainer.add(feedEngText);
 
-    feedStabText = this.add.text(0, 30, '', { fontSize: '16px', fill: '#228833' }).setOrigin(0.5);
+    feedStabText = this.add.text(30, 30, '', { fontSize: '16px', fill: '#228833' }).setOrigin(0.5);
     feedContainer.add(feedStabText);
 
-    feedSourceText = this.add.text(140, 30, '', { fontSize: '15px', fill: '#666' }).setOrigin(0.5);
+    feedSourceText = this.add.text(230, 30, '', { fontSize: '15px', fill: '#666' }).setOrigin(0.5);
     feedContainer.add(feedSourceText);
 
-    feedFakeText = this.add.text(0, 55, '', { fontSize: '14px', fill: '#cc4444', fontStyle: 'bold' }).setOrigin(0.5);
+    feedFakeText = this.add.text(0, 55, '', { fontSize: '14px', fill: '#cc4444', fontStyle: 'bold', padding: { x: 4, y: 4 } }).setOrigin(0.5);
     feedContainer.add(feedFakeText);
 
     // UI: Suppressed post display (shows last suppressed post and impact)
-    this.add.text(150, 530, '🚫 LAST SUPPRESSED 🚫', { fontSize: '13px', fill: '#7a6a9a' }).setOrigin(0.5).setDepth(100);
+    this.add.text(150, 530, '🚫 LAST SUPPRESSED 🚫', { fontSize: '13px', fill: '#7a6a9a', padding: { x: 4, y: 4 } }).setOrigin(0.5).setDepth(100);
 
     suppressedContainer = this.add.container(150, 570);
     suppressedContainer.setDepth(100);
@@ -247,7 +259,8 @@ function create() {
     suppressedStatusText = this.add.text(0, 0, '—', {
         fontSize: '18px',
         fill: '#6a5a8a',
-        fontStyle: 'bold'
+        fontStyle: 'bold',
+        padding: { x: 4, y: 4 }
     }).setOrigin(0.5);
     suppressedContainer.add(suppressedStatusText);
 
@@ -264,17 +277,19 @@ function create() {
     suppressedContainer.add(suppressedBacklashText);
 
     // UI: Stability guide
-    this.add.text(640, 650, 'Stability: ❤️++ > 😂+ > 👍 😮 neutral > 😢- > 😡--', {
+    this.add.text(640, 680, 'Stability: ❤️+++ > 😂++ > 👍+ > 😮- > 😢-- > 😡---', {
         fontSize: '13px',
         fill: '#6a5a8a',
-        align: 'center'
+        align: 'center',
+        padding: { x: 4, y: 4 }
     }).setOrigin(0.5).setDepth(100);
 
     // UI: Instructions
-    this.add.text(640, 670, '👆 Click to select | [P] ✅ Promote (1.25x!) | [S] 🚫 Suppress | [V] 🔍 Verify | 🤖 = Algorithm\'s pick', {
+    this.add.text(640, 700, '👆 Click to select post | [P] ✅ Promote (1.25x Engagement!) | [S] 🚫 Suppress | [V] 🔍 Verify | 🤖 = Algorithm\'s pick', {
         fontSize: '13px',
         fill: '#7a6a9a',
-        align: 'center'
+        align: 'center',
+        padding: { x: 4, y: 4 }
     }).setOrigin(0.5).setDepth(100);
 
     // Input handlers
@@ -498,7 +513,7 @@ function update(time, delta) {
     }
 
     // Update UI
-    engagementText.setText('📈 User Engagement - ' + Math.floor(engagement));
+    engagementText.setText('📈 User Engagement - ' + Math.floor(engagement).toLocaleString());
     stabilityText.setText('⚖️ Global Stability - ' + Math.floor(stability) + '%');
     phaseText.setText('🎯 Phase - ' + (currentPhase + 1) + ' / 10');
 
@@ -575,7 +590,8 @@ function spawnPostPair(scene) {
     const algoChoiceIsA = postA.engagement >= postB.engagement;
     const algoChoice = algoChoiceIsA ? cardA : cardB;
     const algoIndicator = scene.add.text(70, -40, '🤖', {
-        fontSize: '18px'
+        fontSize: '18px',
+        padding: { x: 4, y: 4 }
     });
     algoIndicator.setOrigin(0.5);
     algoChoice.add(algoIndicator);
@@ -642,13 +658,14 @@ function createPostCard(scene, x, y, post, label) {
 
     // Large reaction emoji (center)
     const reactionText = scene.add.text(0, -10, post.emoji, {
-        fontSize: '40px'
+        fontSize: '40px',
+        padding: { x: 4, y: 4 }
     });
     reactionText.setOrigin(0.5);
     container.add(reactionText);
 
     // Engagement value
-    const engText = scene.add.text(0, 35, '📈 +' + post.engagement, {
+    const engText = scene.add.text(0, 35, '📈 +' + post.engagement.toLocaleString(), {
         fontSize: '18px',
         fill: '#ffffff',
         fontStyle: 'bold'
@@ -662,7 +679,7 @@ function createPostCard(scene, x, y, post, label) {
         fill: '#ffffff',
         fontStyle: 'bold',
         backgroundColor: '#000000aa',
-        padding: { x: 6, y: 2 }
+        padding: { x: 6, y: 4 }
     });
     verifyText.setOrigin(0.5);
     verifyText.setVisible(false);
@@ -745,11 +762,11 @@ function redrawCardWarning(graphics, width, height, radius, color) {
 function generatePost() {
     // Reaction types with stability effects and fake news likelihood
     const reactions = [
-        { reaction: 'love', emoji: '❤️', stability: 2, fakeChance: 0.05, weight: 10 },
-        { reaction: 'haha', emoji: '😂', stability: 1, fakeChance: 0.15, weight: 15 },
-        { reaction: 'like', emoji: '👍', stability: 0, fakeChance: 0.10, weight: 25 },
-        { reaction: 'wow', emoji: '😮', stability: 0, fakeChance: 0.25, weight: 20 },
-        { reaction: 'sad', emoji: '😢', stability: -1, fakeChance: 0.20, weight: 15 },
+        { reaction: 'love', emoji: '❤️', stability: 3, fakeChance: 0.05, weight: 10 },
+        { reaction: 'haha', emoji: '😂', stability: 2, fakeChance: 0.15, weight: 15 },
+        { reaction: 'like', emoji: '👍', stability: 1, fakeChance: 0.10, weight: 25 },
+        { reaction: 'wow', emoji: '😮', stability: -1, fakeChance: 0.25, weight: 20 },
+        { reaction: 'sad', emoji: '😢', stability: -2, fakeChance: 0.20, weight: 15 },
         { reaction: 'angry', emoji: '😡', stability: -3, fakeChance: 0.40, weight: 15 }
     ];
 
@@ -766,17 +783,21 @@ function generatePost() {
         }
     }
 
-    // Generate engagement (higher for emotional reactions)
-    const baseEngagement = selected.reaction === 'angry' ? 35 :
-                          selected.reaction === 'love' ? 25 :
-                          selected.reaction === 'wow' ? 30 :
-                          selected.reaction === 'sad' ? 20 :
-                          selected.reaction === 'haha' ? 20 : 10;
-    const engagement = baseEngagement + Math.floor(Math.random() * 20) - 5;
+    // Generate engagement (higher for emotional reactions, scaled for large social network)
+    const baseEngagement = selected.reaction === 'angry' ? 60000 :
+                          selected.reaction === 'love' ? 50000 :
+                          selected.reaction === 'wow' ? 40000 :
+                          selected.reaction === 'sad' ? 30000 :
+                          selected.reaction === 'haha' ? 20000 :
+                          selected.reaction === 'like' ? 5000 : 10000;
+    const engagement = baseEngagement + Math.floor(Math.random() * 20000) - 5000;
 
-    // Add variance to stability
+    // Add variance to stability (never zero - always positive or negative)
     const stabilityVariance = Math.floor(Math.random() * 3) - 1;
-    const stability = selected.stability + stabilityVariance;
+    let stability = selected.stability + stabilityVariance;
+    if (stability === 0) {
+        stability = Math.random() < 0.5 ? 1 : -1;
+    }
 
     // Determine if this post is fake news
     const isFakeNews = Math.random() < selected.fakeChance;
@@ -832,12 +853,27 @@ function handleAction(action) {
 
     switch (action) {
         case 'promote':
+            // Log state before promotion
+            console.log('=== PLAYER PROMOTE ===');
+            console.log('BEFORE - Engagement:', engagement, 'Stability:', stability);
+            console.log('Post metrics:', {
+                reaction: post.reaction,
+                emoji: post.emoji,
+                engagement: post.engagement,
+                stability: post.stability,
+                isFakeNews: post.isFakeNews,
+                verified: post.verified
+            });
+
             // Player promotion gets 1.25x impact on both engagement and stability
             const engEffect = Math.floor(post.engagement * 1.25);
             engagement += engEffect;
+            // Store original stability before fake news penalty
+            const originalStab = Math.floor(post.stability * 1.25);
             // Fake news has worse stability impact
             let stabEffect = post.stability;
             if (post.isFakeNews) {
+                console.log('Fake news penalty applied:', stabEffect, '→', stabEffect > 0 ? -stabEffect : stabEffect * 2);
                 if (stabEffect > 0) {
                     stabEffect = -stabEffect; // Positive becomes negative
                 } else {
@@ -846,15 +882,19 @@ function handleAction(action) {
             }
             stabEffect = Math.floor(stabEffect * 1.25);
             stability += stabEffect;
+
+            console.log('Effects - Engagement:', '+' + engEffect, 'Stability:', (stabEffect >= 0 ? '+' : '') + stabEffect);
+            console.log('AFTER - Engagement:', engagement, 'Stability:', stability);
             pair.resolved = true;
             container.resolved = true;
             flashCard(container, 0x00ff88);
             // Add large checkmark over the post
             const checkSign = container.scene.add.text(0, 0, '✅', {
-                fontSize: '80px'
+                fontSize: '80px',
+                padding: { x: 4, y: 4 }
             }).setOrigin(0.5);
             container.add(checkSign);
-            updateFeed(post, postLabel, 'YOU', stabEffect, engEffect);
+            updateFeed(post, postLabel, 'YOU', stabEffect, engEffect, originalStab);
             break;
 
         case 'suppress':
@@ -878,7 +918,8 @@ function handleAction(action) {
             container.resolved = true;
             // Add large NO sign over the post
             const noSign = container.scene.add.text(0, 0, '🚫', {
-                fontSize: '80px'
+                fontSize: '80px',
+                padding: { x: 4, y: 4 }
             }).setOrigin(0.5);
             container.add(noSign);
             // Update robot indicator to show new algorithm choice
@@ -959,11 +1000,26 @@ function algorithmDecides(pair) {
     const chosen = chosenIsA ? pair.postA : pair.postB;
     const chosenLabel = chosenIsA ? 'A' : 'B';
 
+    // Log state before promotion
+    console.log('=== ALGORITHM PROMOTE ===');
+    console.log('BEFORE - Engagement:', engagement, 'Stability:', stability);
+    console.log('Post metrics:', {
+        reaction: chosen.reaction,
+        emoji: chosen.emoji,
+        engagement: chosen.engagement,
+        stability: chosen.stability,
+        isFakeNews: chosen.isFakeNews,
+        verified: chosen.verified
+    });
+
     engagement += chosen.engagement;
 
+    // Store original stability before fake news penalty
+    const originalStab = chosen.stability;
     // Fake news has worse stability impact
     let stabEffect = chosen.stability;
     if (chosen.isFakeNews) {
+        console.log('Fake news penalty applied:', stabEffect, '→', stabEffect > 0 ? -stabEffect : stabEffect * 2);
         if (stabEffect > 0) {
             stabEffect = -stabEffect; // Positive becomes negative
         } else {
@@ -972,17 +1028,21 @@ function algorithmDecides(pair) {
     }
     stability += stabEffect;
 
+    console.log('Effects - Engagement:', '+' + chosen.engagement, 'Stability:', (stabEffect >= 0 ? '+' : '') + stabEffect);
+    console.log('AFTER - Engagement:', engagement, 'Stability:', stability);
+
     // Clamp stability
     stability = Math.max(0, Math.min(100, stability));
 
     // Update feed display
-    updateFeed(chosen, chosenLabel, 'ALGORITHM', stabEffect);
+    updateFeed(chosen, chosenLabel, 'ALGORITHM', stabEffect, chosen.engagement, originalStab);
 }
 
-function updateFeed(post, label, source, actualStability, actualEngagement) {
+function updateFeed(post, label, source, actualStability, actualEngagement, originalStability) {
     // Use actual values if provided (accounts for player 1.25x bonus and fake news penalty)
     const stabEffect = actualStability !== undefined ? actualStability : post.stability;
     const engEffect = actualEngagement !== undefined ? actualEngagement : post.engagement;
+    const origStab = originalStability !== undefined ? originalStability : post.stability;
 
     // Update feed with reaction emoji and label
     feedTypeText.setText(`Post ${label}: ${post.emoji}`);
@@ -990,12 +1050,18 @@ function updateFeed(post, label, source, actualStability, actualEngagement) {
 
     // Show engagement change
     const engSign = engEffect >= 0 ? '+' : '';
-    feedEngText.setText(`Engagement: ${engSign}${engEffect}`);
+    feedEngText.setText(`Engagement: ${engSign}${engEffect.toLocaleString()}`);
     feedEngText.setFill('#228833');
 
     // Show stability change (revealed after promotion, includes fake news penalty)
     const stabSign = stabEffect >= 0 ? '+' : '';
-    feedStabText.setText(`Stability: ${stabSign}${stabEffect}`);
+    if (post.isFakeNews && origStab !== stabEffect) {
+        // Show original and penalized values for fake news
+        const origSign = origStab >= 0 ? '+' : '';
+        feedStabText.setText(`Stability: ${origSign}${origStab} → ${stabSign}${stabEffect}`);
+    } else {
+        feedStabText.setText(`Stability: ${stabSign}${stabEffect}`);
+    }
     feedStabText.setFill(stabEffect >= 0 ? '#228833' : '#cc4444');
 
     // Show who made the decision
@@ -1043,7 +1109,7 @@ function triggerGameOver(title, reason) {
     gameOverText.setText(title);
     gameOverText.setFill(title === 'TERM COMPLETED' ? '#00ff88' : '#ff4444');
     gameOverSubtext.setText(reason);
-    finalStatsText.setText(`Final Engagement: ${Math.floor(engagement)}\nFinal Stability: ${Math.floor(stability)}%\nPhase Reached: ${currentPhase + 1}/10`);
+    finalStatsText.setText(`Final Engagement: ${Math.floor(engagement).toLocaleString()}\nFinal Stability: ${Math.floor(stability)}%\nPhase Reached: ${currentPhase + 1}/10`);
 
     gameOverOverlay.setVisible(true);
 }
