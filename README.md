@@ -25,11 +25,11 @@ Posts show their **engagement value** (visible) and **reaction type** (visible).
 
 | Reaction | Emoji | Stability | Fake News Risk |
 |----------|-------|-----------|----------------|
-| Love | ❤️ | +2 (Most stabilizing) | Very low (5%) |
-| Haha | 😂 | +1 (Stabilizing) | Low (15%) |
-| Like | 👍 | 0 (Neutral) | Low (10%) |
-| Wow | 😮 | 0 (Neutral) | Moderate (25%) |
-| Sad | 😢 | -1 (Destabilizing) | Moderate (20%) |
+| Love | ❤️ | +3 (Most stabilizing) | Very low (5%) |
+| Haha | 😂 | +2 (Stabilizing) | Low (15%) |
+| Like | 👍 | +1 (Slightly stabilizing) | Low (10%) |
+| Wow | 😮 | -1 (Slightly destabilizing) | Moderate (25%) |
+| Sad | 😢 | -2 (Destabilizing) | Moderate (20%) |
 | Angry | 😡 | -3 (Most destabilizing) | High (40%) |
 
 **Tip:** Fake news inverts positive stability and doubles negative stability when promoted!

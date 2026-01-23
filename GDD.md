@@ -158,11 +158,11 @@ Players cannot censor their way to stability—guessing wrong makes things progr
 
 Posts are categorized by the dominant user reaction they provoke. Reaction type determines hidden stability impact:
 
-* ❤️ Love – Most stabilizing (+2), low fake news chance (5%)
-* 😂 Haha – Stabilizing (+1), low fake news chance (15%)
-* 👍 Like – Neutral (0), low fake news chance (10%)
-* 😮 Wow – Neutral (0), moderate fake news chance (25%)
-* 😢 Sad – Destabilizing (-1), moderate fake news chance (20%)
+* ❤️ Love – Most stabilizing (+3), low fake news chance (5%)
+* 😂 Haha – Stabilizing (+2), low fake news chance (15%)
+* 👍 Like – Slightly stabilizing (+1), low fake news chance (10%)
+* 😮 Wow – Slightly destabilizing (-1), moderate fake news chance (25%)
+* 😢 Sad – Destabilizing (-2), moderate fake news chance (20%)
 * 😡 Angry – Most destabilizing (-3), high fake news chance (40%)
 
 **Fake News Penalty:** When fake news is promoted, positive stability becomes negative and negative stability is doubled.
