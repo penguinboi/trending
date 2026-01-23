@@ -17,6 +17,8 @@ You are a Content Moderator at *Wildfire Social*, a major social media platform.
 - **[S] Suppress** - Block content (escalating backlash if it wasn't fake news!)
 - **[V] Verify** - Check if content is real or fake (takes 2 seconds!)
 
+**Mobile/Touch:** Use the on-screen action buttons (👆 ACTIONS) instead of keyboard shortcuts.
+
 If you don't act, the algorithm decides for you - and it always chooses maximum engagement.
 
 ## 📊 Reaction Types

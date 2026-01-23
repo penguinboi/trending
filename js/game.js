@@ -56,6 +56,51 @@ function createRoundedRect(scene, x, y, width, height, radius, fillColor, fillAl
     return graphics;
 }
 
+// Helper to create touch-friendly action button
+function createActionButton(scene, x, y, width, height, label, color, callback) {
+    const container = scene.add.container(x, y);
+    container.setDepth(100);
+
+    const graphics = scene.add.graphics();
+    const radius = 12;
+
+    const drawButton = (hover) => {
+        graphics.clear();
+        // Shadow
+        graphics.fillStyle(0x000000, 0.3);
+        graphics.fillRoundedRect(-width/2 + 3, -height/2 + 3, width, height, radius);
+        // Main fill
+        graphics.fillStyle(hover ? Phaser.Display.Color.ValueToColor(color).lighten(20).color : color, 1);
+        graphics.fillRoundedRect(-width/2, -height/2, width, height, radius);
+        // Highlight
+        graphics.fillStyle(0xffffff, 0.2);
+        graphics.fillRoundedRect(-width/2, -height/2, width, height/3, { tl: radius, tr: radius, bl: 0, br: 0 });
+        // Border
+        graphics.lineStyle(2, 0xffffff, 0.5);
+        graphics.strokeRoundedRect(-width/2, -height/2, width, height, radius);
+    };
+    drawButton(false);
+    container.add(graphics);
+
+    // Invisible hitbox
+    const hitbox = scene.add.rectangle(0, 0, width, height, 0xffffff, 0);
+    hitbox.setInteractive({ useHandCursor: true });
+    hitbox.on('pointerover', () => drawButton(true));
+    hitbox.on('pointerout', () => drawButton(false));
+    hitbox.on('pointerdown', callback);
+    container.add(hitbox);
+
+    // Label
+    const text = scene.add.text(0, 0, label, {
+        fontSize: '18px',
+        fill: '#ffffff',
+        fontStyle: 'bold'
+    }).setOrigin(0.5);
+    container.add(text);
+
+    return container;
+}
+
 // Helper to create fire gradient title text
 function createFireTitle(scene, x, y, fontSize) {
     const container = scene.add.container(x, y);
@@ -150,6 +195,11 @@ let messageText;
 let messageTimer = 0;
 const MESSAGE_DURATION = 3000; // 3 seconds
 let stabilityWarningShown = { 50: false, 33: false, 20: false };
+
+// Action buttons for mobile
+let promoteButton;
+let suppressButton;
+let verifyButton;
 
 // Cheat code state
 let cheatBuffer = '';
@@ -317,6 +367,24 @@ function create() {
         align: 'center',
         padding: { x: 4, y: 4 }
     }).setOrigin(0.5).setDepth(100);
+
+    // Mobile action buttons (stacked vertically, left of decision zone)
+    const buttonX = 950;
+    const buttonStartY = 95;
+    const buttonWidth = 85;
+    const buttonHeight = 38;
+    const buttonSpacing = 6;
+
+    // Label above buttons
+    this.add.text(buttonX, buttonStartY - 32, '👆 ACTIONS', {
+        fontSize: '14px',
+        fill: '#7a6a9a',
+        fontStyle: 'bold'
+    }).setOrigin(0.5).setDepth(100);
+
+    promoteButton = createActionButton(this, buttonX, buttonStartY, buttonWidth, buttonHeight, '✅ P', 0x27ae60, () => handleAction('promote'));
+    suppressButton = createActionButton(this, buttonX, buttonStartY + buttonHeight + buttonSpacing, buttonWidth, buttonHeight, '🚫 S', 0xe74c3c, () => handleAction('suppress'));
+    verifyButton = createActionButton(this, buttonX, buttonStartY + (buttonHeight + buttonSpacing) * 2, buttonWidth, buttonHeight, '🔍 V', 0x3498db, () => handleAction('verify'));
 
     // Input handlers
     this.input.keyboard.on('keydown-P', () => handleAction('promote'));

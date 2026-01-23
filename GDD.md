@@ -261,7 +261,9 @@ Win if:
 
 * **Dependencies:** None beyond Phaser CDN
 
-* **Input:** Mouse/touch (click to select, keyboard P/S/V for actions)
+* **Input:** Mouse/touch with dual control schemes:
+  * Desktop: Click to select, keyboard P/S/V for actions
+  * Mobile: Click to select, on-screen action buttons (stacked vertically left of decision zone)
 
 ---
 
