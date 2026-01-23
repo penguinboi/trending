@@ -48,7 +48,7 @@ If you do nothing, the algorithm decides.
 
 7. World conditions affect future rounds (NOT IMPLEMENTED)
 
-Decision cycles vary by phase (~7s in phase 1, ~0.6s in phase 10).
+Decision cycles vary by phase (~9s in phase 1, ~0.8s in phase 10).
 
 ---
 
@@ -205,7 +205,7 @@ Win if:
 
 ### **Art & Presentation**
 
-* Cute, friendly aesthetic with light blue background (#d4e9ff)
+* Cute, friendly aesthetic with sky blue background (#a8d4f0)
 
 * Fire gradient title "🔥 TRENDING 🔥" from yellow (#FFD700) to red (#FF0000)
 
@@ -221,6 +221,11 @@ Win if:
 * Card colors match reaction type (blue=like, pink=love, yellow=haha, etc.)
 
 * Purple-toned text for readability on light background
+
+* Contextual message system provides feedback:
+  * Player action outcomes (promoted fake news, good choices, censorship backlash)
+  * Algorithm decisions (fake news got through, destabilizing content spread)
+  * Phase transitions and stability warnings
 
 * Stability guide showing reaction ranking above controls
 

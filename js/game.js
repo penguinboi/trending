@@ -9,7 +9,7 @@ const config = {
     width: 1280,
     height: 720,
     parent: 'game-container',
-    backgroundColor: '#d4e9ff',
+    backgroundColor: '#a8d4f0',
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
@@ -32,7 +32,7 @@ let gameTimer = 0;
 let currentPhase = 0;
 
 // Difficulty scaling - belt speeds per phase (index 0-9)
-const PHASE_SPEEDS = [30, 45, 65, 90, 120, 155, 195, 240, 290, 350];
+const PHASE_SPEEDS = [24, 36, 52, 72, 96, 124, 156, 192, 232, 280];
 
 // Card spacing: 180px card + 40px gap = 220px clearance
 const CARD_CLEARANCE = 220;
@@ -146,6 +146,16 @@ let playAgainButton;
 let engagementText;
 let stabilityText;
 let decisionZone;
+let messageText;
+let messageTimer = 0;
+const MESSAGE_DURATION = 3000; // 3 seconds
+let stabilityWarningShown = { 50: false, 33: false, 20: false };
+
+// Cheat code state
+let cheatBuffer = '';
+let godMode = false;
+const CHEAT_CODE = 'SUDO';
+let godModeIndicator;
 
 function preload() {
     // No external assets yet - using graphics primitives
@@ -191,6 +201,22 @@ function create() {
         fontSize: '18px',
         padding: { x: 10, y: 10 }
     }).setOrigin(0, 0.5).setDepth(100);
+
+    // Message area (contextual feedback to player)
+    messageText = this.add.text(640, 150, '', {
+        fontSize: '16px',
+        fill: '#cc4444',
+        fontStyle: 'bold',
+        padding: { x: 4, y: 4 }
+    }).setOrigin(0.5).setDepth(100);
+
+    // God mode indicator (hidden by default)
+    godModeIndicator = this.add.text(1260, 20, '🔓 GOD MODE', {
+        fontSize: '14px',
+        fill: '#9b59b6',
+        fontStyle: 'bold',
+        padding: { x: 4, y: 4 }
+    }).setOrigin(1, 0).setDepth(100).setVisible(false);
 
     // Decision zone (right side of screen)
     decisionZone = this.add.rectangle(1100, 360, 200, 600, 0x2d2d4a, 0.3);
@@ -238,16 +264,16 @@ function create() {
     }).setOrigin(0.5);
     feedContainer.add(feedTypeText);
 
-    feedEngText = this.add.text(-250, 30, '', { fontSize: '16px', fill: '#228833' }).setOrigin(0.5);
+    feedEngText = this.add.text(0, 25, '', { fontSize: '16px', fill: '#228833' }).setOrigin(0.5);
     feedContainer.add(feedEngText);
 
-    feedStabText = this.add.text(30, 30, '', { fontSize: '16px', fill: '#228833' }).setOrigin(0.5);
+    feedStabText = this.add.text(0, 45, '', { fontSize: '16px', fill: '#228833' }).setOrigin(0.5);
     feedContainer.add(feedStabText);
 
-    feedSourceText = this.add.text(230, 30, '', { fontSize: '15px', fill: '#666' }).setOrigin(0.5);
+    feedSourceText = this.add.text(0, 65, '', { fontSize: '15px', fill: '#666' }).setOrigin(0.5);
     feedContainer.add(feedSourceText);
 
-    feedFakeText = this.add.text(0, 55, '', { fontSize: '14px', fill: '#cc4444', fontStyle: 'bold', padding: { x: 4, y: 4 } }).setOrigin(0.5);
+    feedFakeText = this.add.text(0, 85, '', { fontSize: '14px', fill: '#cc4444', fontStyle: 'bold', padding: { x: 4, y: 4 } }).setOrigin(0.5);
     feedContainer.add(feedFakeText);
 
     // UI: Suppressed post display (shows last suppressed post and impact)
@@ -277,7 +303,7 @@ function create() {
     suppressedContainer.add(suppressedBacklashText);
 
     // UI: Stability guide
-    this.add.text(640, 680, 'Stability: ❤️+++ > 😂++ > 👍+ > 😮- > 😢-- > 😡---', {
+    this.add.text(640, 680, 'Estimated Stability Impact: ❤️+++ > 😂++ > 👍+ > 😮- > 😢-- > 😡---', {
         fontSize: '13px',
         fill: '#6a5a8a',
         align: 'center',
@@ -296,6 +322,22 @@ function create() {
     this.input.keyboard.on('keydown-P', () => handleAction('promote'));
     this.input.keyboard.on('keydown-S', () => handleAction('suppress'));
     this.input.keyboard.on('keydown-V', () => handleAction('verify'));
+
+    // Cheat code listener
+    this.input.keyboard.on('keydown', (event) => {
+        cheatBuffer += event.key.toUpperCase();
+        if (cheatBuffer.length > CHEAT_CODE.length) {
+            cheatBuffer = cheatBuffer.slice(-CHEAT_CODE.length);
+        }
+        if (cheatBuffer === CHEAT_CODE) {
+            godMode = !godMode;
+            cheatBuffer = '';
+            godModeIndicator.setVisible(godMode);
+            if (godMode) {
+                showMessage('🔓 God mode enabled!', '#9b59b6');
+            }
+        }
+    });
 
     // Game over overlay (hidden initially, high depth to render above posts)
     gameOverOverlay = this.add.container(640, 360);
@@ -357,7 +399,7 @@ function create() {
     startOverlay = this.add.container(640, 360);
     startOverlay.setDepth(1001);
 
-    const startBg = this.add.rectangle(0, 0, 1280, 720, 0xd4e9ff, 1);
+    const startBg = this.add.rectangle(0, 0, 1280, 720, 0xa8d4f0, 1);
     startOverlay.add(startBg);
 
     const startTitle = createFireTitle(this, 0, -290, 79);
@@ -448,8 +490,8 @@ function update(time, delta) {
     // Check for game over
     if (gameOver) return;
 
-    // Check loss conditions
-    if (stability <= 0) {
+    // Check loss conditions (skip if god mode enabled)
+    if (stability <= 0 && !godMode) {
         triggerGameOver('💔 SOCIETAL COLLAPSE 💔', '😰 The world has become divided and unstable.\nYour platform accelerated the fracturing of society.');
         return;
     }
@@ -468,6 +510,14 @@ function update(time, delta) {
         beltSpeed = PHASE_SPEEDS[currentPhase];
         // Reset spawn timer to prevent overlap when interval shortens
         spawnTimer = 0;
+        // Show phase change message
+        if (currentPhase >= 7) {
+            showMessage(`⚡ Phase ${currentPhase + 1}! Content is flooding in!`, '#cc4444');
+        } else if (currentPhase >= 4) {
+            showMessage(`🎯 Phase ${currentPhase + 1} - Speed increasing!`, '#cc8800');
+        } else {
+            showMessage(`🎯 Phase ${currentPhase + 1} begins.`, '#5a3d7a');
+        }
     }
 
     // Move posts along the belt
@@ -530,6 +580,28 @@ function update(time, delta) {
         stabilityText.setFill('#cc8800');
     } else {
         stabilityText.setFill('#cc4444');
+    }
+
+    // Stability threshold warnings
+    if (stability <= 20 && !stabilityWarningShown[20]) {
+        showMessage('🔥 CRITICAL! Society is fracturing!', '#cc4444');
+        stabilityWarningShown[20] = true;
+    } else if (stability <= 33 && !stabilityWarningShown[33]) {
+        showMessage('😰 Stability critical! Be careful!', '#cc4444');
+        stabilityWarningShown[33] = true;
+    } else if (stability <= 50 && !stabilityWarningShown[50]) {
+        showMessage('📉 Stability dropping. Watch the reactions.', '#cc8800');
+        stabilityWarningShown[50] = true;
+    }
+
+    // Update message timer (fade out)
+    if (messageTimer > 0) {
+        messageTimer -= delta;
+        if (messageTimer <= 0) {
+            messageText.setAlpha(0);
+        } else if (messageTimer < 1000) {
+            messageText.setAlpha(messageTimer / 1000);
+        }
     }
 
     // Update verification timer
@@ -895,6 +967,12 @@ function handleAction(action) {
             }).setOrigin(0.5);
             container.add(checkSign);
             updateFeed(post, postLabel, 'YOU', stabEffect, engEffect, originalStab);
+            // Show message based on outcome
+            if (post.isFakeNews) {
+                showMessage('🚨 You promoted fake news!', '#cc4444');
+            } else if (stabEffect >= 2) {
+                showMessage('✨ Great choice! Stability increased.', '#228833');
+            }
             break;
 
         case 'suppress':
@@ -905,11 +983,13 @@ function handleAction(action) {
                 suppressImpact = -suppressionBacklash; // -1, -2, -3, etc.
                 stability += suppressImpact;
                 flashCard(container, 0xff4444);
+                showMessage(`⚠️ Censorship backlash! That was real content. (${suppressImpact})`, '#cc4444');
             } else {
                 // Suppressing fake news is good
                 suppressImpact = 1;
                 stability += suppressImpact;
                 flashCard(container, 0x00ff88);
+                showMessage('✅ Fake news blocked! Good call.', '#228833');
             }
             // Update suppressed post display
             updateSuppressedDisplay(post, suppressImpact);
@@ -1036,6 +1116,13 @@ function algorithmDecides(pair) {
 
     // Update feed display
     updateFeed(chosen, chosenLabel, 'ALGORITHM', stabEffect, chosen.engagement, originalStab);
+
+    // Show message for algorithm decisions
+    if (chosen.isFakeNews) {
+        showMessage('🚨 Algorithm promoted fake news!', '#cc4444');
+    } else if (stabEffect <= -2) {
+        showMessage('📉 Algorithm spread destabilizing content.', '#cc8800');
+    }
 }
 
 function updateFeed(post, label, source, actualStability, actualEngagement, originalStability) {
@@ -1058,7 +1145,7 @@ function updateFeed(post, label, source, actualStability, actualEngagement, orig
     if (post.isFakeNews && origStab !== stabEffect) {
         // Show original and penalized values for fake news
         const origSign = origStab >= 0 ? '+' : '';
-        feedStabText.setText(`Stability: ${origSign}${origStab} → ${stabSign}${stabEffect}`);
+        feedStabText.setText(`Stability: ${origSign}${origStab} → ${stabSign}${stabEffect} 🚨 Fake News Penalty`);
     } else {
         feedStabText.setText(`Stability: ${stabSign}${stabEffect}`);
     }
@@ -1126,10 +1213,18 @@ function getReactionColorHex(reaction) {
     return colors[reaction] || '#4a5568';
 }
 
+function showMessage(text, color) {
+    messageText.setText(text);
+    messageText.setFill(color || '#cc4444');
+    messageText.setAlpha(1);
+    messageTimer = MESSAGE_DURATION;
+}
+
 function startGame() {
     gameStarted = true;
     startOverlay.setVisible(false);
     spawnPostPair(currentScene);
+    showMessage('👋 Welcome, new moderator! Good luck.', '#5a3d7a');
 }
 
 function resetGame() {
@@ -1152,6 +1247,11 @@ function resetGame() {
     verifyingPost = null;
     verifyTimer = 0;
     suppressionBacklash = 0;
+    stabilityWarningShown = { 50: false, 33: false, 20: false };
+    messageTimer = 0;
+    cheatBuffer = '';
+    godMode = false;
+    godModeIndicator.setVisible(false);
 
     // Reset UI
     engagementText.setText('📈 User Engagement - 0');
@@ -1169,6 +1269,8 @@ function resetGame() {
     suppressedStatusText.setFill('#6a5a8a');
     suppressedImpactText.setText('');
     suppressedBacklashText.setText('');
+    messageText.setText('');
+    messageText.setAlpha(0);
 
     // Hide game over, show start screen
     gameOverOverlay.setVisible(false);
