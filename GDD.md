@@ -273,7 +273,7 @@ Win if:
 
 **Music Credit:** [Not Jam Music Pack](https://not-jam.itch.io/not-jam-music-pack) by Not Jam
 
-**SFX Credit:** [Ultimate UI SFX Pack](https://jdsherbert.itch.io/) by JDSherbert
+**SFX Credit:** [Ultimate UI SFX Pack](https://jdsherbert.itch.io/) by JDSherbert, additional SFX by Kevin Fowler (CC license)
 
 ---
 
