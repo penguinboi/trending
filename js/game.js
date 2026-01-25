@@ -705,12 +705,12 @@ function update(time, delta) {
     }
 }
 
-function spawnPostPair(scene) {
+function spawnPostPair(scene, startX = -200) {
     const postA = generatePost();
     const postB = generatePost();
 
     // Create container for the pair (depth 10 keeps posts below UI)
-    const container = scene.add.container(-200, 360);
+    const container = scene.add.container(startX, 360);
     container.setDepth(10);
 
     // Post A (top)
@@ -737,7 +737,7 @@ function spawnPostPair(scene) {
     algoChoice.add(algoIndicator);
 
     const pair = {
-        x: -200,
+        x: startX,
         container: container,
         postA: postA,
         postB: postB,
@@ -1291,7 +1291,10 @@ function showMessage(text, color) {
 function startGame() {
     gameStarted = true;
     startOverlay.setVisible(false);
-    spawnPostPair(currentScene);
+    // Start first pair one CARD_CLEARANCE ahead of spawn point
+    spawnPostPair(currentScene, -200 + CARD_CLEARANCE);
+    // Trigger immediate spawn of second pair to maintain proper spacing
+    spawnTimer = getSpawnInterval();
     showMessage('👋 Welcome, new moderator! Good luck.', '#5a3d7a');
 }
 
