@@ -236,6 +236,8 @@ Win if:
 
 * Credits displayed on start screen
 
+* Phase banner: Large "PHASE X" text appears briefly (0.5 sec) at center when entering new phase
+
 * Card colors match reaction type (blue=like, pink=love, yellow=haha, etc.)
 
 * Purple-toned text for readability on light background
@@ -259,11 +261,15 @@ Win if:
 
 * Intro music: Loops on title screen, stops when game starts
 
-* Background music: "Switch With Me Theme" looping track, speeds up 10% each loop to build tension
+* Background music: "Switch With Me Theme" starts at 80% speed, increases 10% each loop to build tension
 
 * Game over music: Different tracks for collapse vs victory outcomes
 
+* Phase transition sound: Plays when entering a new phase
+
 * Sound effects for all player actions: select, promote, suppress, verify
+
+* UI button sounds: Select sound plays on all menu buttons (intro, game over, restart, confirmation)
 
 **Music Credit:** [Not Jam Music Pack](https://not-jam.itch.io/not-jam-music-pack) by Not Jam
 

@@ -226,6 +226,7 @@ function preload() {
     this.load.audio('verify', 'assets/audio/verify.wav');
     this.load.audio('gameover', 'assets/audio/gameover.ogg');
     this.load.audio('victory', 'assets/audio/victory.ogg');
+    this.load.audio('phase', 'assets/audio/phase.ogg');
 }
 
 // UI references for phase/timer
@@ -272,6 +273,7 @@ function create() {
 
     // Restart button (upper right, hidden until game starts)
     const restartButton = createActionButton(this, 1100, 30, 200, 44, '🔄 Restart Game', 0x7a6a9a, () => {
+        currentScene.sound.play('select', { volume: 0.5 });
         confirmOverlay.setVisible(true);
     });
     restartButton.setDepth(100);
@@ -311,7 +313,7 @@ function create() {
     timerText = this.add.text(20, 110, '⏱️ Time Left - 10:00', { fontSize: '22px', fill: '#5a3d7a', padding: { x: 4, y: 4 } }).setDepth(100);
 
     // UI: Feed display (shows last promoted content and effects)
-    this.add.text(640, 530, '📣 Last Post Promoted to 🔥Wildfire Social Feed 📣', { fontSize: '16px', fill: '#7a6a9a', padding: { x: 4, y: 4 } }).setOrigin(0.5).setDepth(100);
+    this.add.text(640, 530, '📣 Last Post Promoted to 🔥Wildfire Social Feed 📣', { fontSize: '22px', fill: '#7a6a9a', padding: { x: 4, y: 4 } }).setOrigin(0.5).setDepth(100);
 
     feedContainer = this.add.container(640, 570);
     feedContainer.setDepth(100);
@@ -337,7 +339,7 @@ function create() {
     feedContainer.add(feedFakeText);
 
     // UI: Suppressed post display (shows last suppressed post and impact)
-    this.add.text(150, 530, '🚫 LAST SUPPRESSED 🚫', { fontSize: '16px', fill: '#7a6a9a', padding: { x: 4, y: 4 } }).setOrigin(0.5).setDepth(100);
+    this.add.text(150, 530, '🚫 LAST SUPPRESSED 🚫', { fontSize: '22px', fill: '#7a6a9a', padding: { x: 4, y: 4 } }).setOrigin(0.5).setDepth(100);
 
     suppressedContainer = this.add.container(150, 570);
     suppressedContainer.setDepth(100);
@@ -457,7 +459,10 @@ function create() {
     playAgainHitbox.setInteractive({ useHandCursor: true });
     playAgainHitbox.on('pointerover', () => drawPlayAgainButton(true));
     playAgainHitbox.on('pointerout', () => drawPlayAgainButton(false));
-    playAgainHitbox.on('pointerdown', () => resetGame());
+    playAgainHitbox.on('pointerdown', () => {
+        this.sound.play('select', { volume: 0.5 });
+        resetGame();
+    });
     gameOverOverlay.add(playAgainHitbox);
 
     playAgainButton = this.add.text(0, 160, '🔄 PLAY AGAIN 🎮', {
@@ -506,6 +511,7 @@ function create() {
     yesHitbox.on('pointerover', () => drawYesButton(true));
     yesHitbox.on('pointerout', () => drawYesButton(false));
     yesHitbox.on('pointerdown', () => {
+        this.sound.play('select', { volume: 0.5 });
         confirmOverlay.setVisible(false);
         resetGame();
     });
@@ -535,6 +541,7 @@ function create() {
     noHitbox.on('pointerover', () => drawNoButton(true));
     noHitbox.on('pointerout', () => drawNoButton(false));
     noHitbox.on('pointerdown', () => {
+        this.sound.play('select', { volume: 0.5 });
         confirmOverlay.setVisible(false);
     });
     confirmOverlay.add(noHitbox);
@@ -658,7 +665,10 @@ function create() {
     startHitbox.setInteractive({ useHandCursor: true });
     startHitbox.on('pointerover', () => drawStartButton(true));
     startHitbox.on('pointerout', () => drawStartButton(false));
-    startHitbox.on('pointerdown', () => startGame());
+    startHitbox.on('pointerdown', () => {
+        this.sound.play('select', { volume: 0.5 });
+        startGame();
+    });
     startHitbox.setVisible(false);
     startOverlay.add(startHitbox);
 
@@ -672,6 +682,7 @@ function create() {
 
     // Next button click handler
     nextHitbox.on('pointerdown', () => {
+        this.sound.play('select', { volume: 0.5 });
         currentParagraph++;
         if (currentParagraph < introParagraphs.length) {
             introText.setText(introParagraphs[currentParagraph]);
@@ -745,6 +756,9 @@ function update(time, delta) {
         beltSpeed = PHASE_SPEEDS[currentPhase];
         // Reset spawn timer to prevent overlap when interval shortens
         spawnTimer = 0;
+        // Play phase sound and show banner
+        currentScene.sound.play('phase', { volume: 0.5 });
+        showPhaseBanner(currentPhase + 1);
         // Show phase change message
         if (currentPhase >= 7) {
             showMessage(`⚡ Phase ${currentPhase + 1}! Content is flooding in!`, '#cc4444');
@@ -1481,6 +1495,33 @@ function showMessage(text, color) {
     messageTimer = MESSAGE_DURATION;
 }
 
+function showPhaseBanner(phaseNum) {
+    // Create large banner in center of screen
+    const banner = currentScene.add.container(640, 360);
+    banner.setDepth(500);
+
+    const bg = currentScene.add.graphics();
+    bg.fillStyle(0x000000, 0.8);
+    bg.fillRoundedRect(-200, -60, 400, 120, 20);
+    banner.add(bg);
+
+    const text = currentScene.add.text(0, 0, `PHASE ${phaseNum}`, {
+        fontSize: '64px',
+        fill: '#ffffff',
+        fontStyle: 'bold'
+    }).setOrigin(0.5);
+    banner.add(text);
+
+    // Fade out after 0.5 seconds
+    currentScene.tweens.add({
+        targets: banner,
+        alpha: 0,
+        duration: 200,
+        delay: 300,
+        onComplete: () => banner.destroy()
+    });
+}
+
 function startGame() {
     gameStarted = true;
     startOverlay.setVisible(false);
@@ -1489,8 +1530,8 @@ function startGame() {
     if (introMusic) {
         introMusic.stop();
     }
-    // Start background music (speeds up each loop)
-    musicRate = 1.0;
+    // Start background music at 80% speed, speeds up 10% each loop
+    musicRate = 0.8;
     bgMusic = currentScene.sound.add('music', { volume: 0.5 });
     bgMusic.on('complete', () => {
         musicRate *= 1.1;
