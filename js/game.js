@@ -710,7 +710,7 @@ function create() {
     }).setOrigin(0.5);
     startOverlay.add(copyrightText);
 
-    const musicCredit = this.add.text(0, 340, '🎵 Music by Not Jam | 🔊 SFX by JDSherbert', {
+    const musicCredit = this.add.text(0, 340, '🎵 Music by Not Jam | 🔊 SFX by JDSherbert & Kevin Fowler', {
         fontSize: '16px',
         fill: '#8a7aaa'
     }).setOrigin(0.5);
