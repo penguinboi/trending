@@ -17,7 +17,9 @@ You are a Content Moderator at *Wildfire Social*, a major social media platform.
 - **[S] Suppress** - Block content (escalating backlash if it wasn't fake news!)
 - **[V] Verify** - Check if content is real or fake (takes 2 seconds!)
 
-**Mobile/Touch:** Use the on-screen action buttons (👆 ACTIONS) instead of keyboard shortcuts.
+**Touch/Click:** Use the large on-screen action buttons centered above the belt.
+
+**Restart:** Click the restart button in the upper right to start over.
 
 If you don't act, the algorithm decides for you - and it always chooses maximum engagement.
 
@@ -71,6 +73,12 @@ trending/
 - **Theme:** "The World is Watching"
 - **Deadline:** January 31st, 2026 at 6:00 AM
 - **Jam Page:** https://itch.io/jam/pirate
+
+## 🎵 Credits
+
+**Music:** [Not Jam Music Pack](https://not-jam.itch.io/not-jam-music-pack) by Not Jam
+
+**SFX:** [Ultimate UI SFX Pack](https://jdsherbert.itch.io/) by JDSherbert
 
 ## 📜 License
 

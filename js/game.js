@@ -90,9 +90,10 @@ function createActionButton(scene, x, y, width, height, label, color, callback) 
     hitbox.on('pointerdown', callback);
     container.add(hitbox);
 
-    // Label
+    // Label (scale font with button height, minimum 16px)
+    const fontSize = Math.max(16, Math.round(height * 0.47));
     const text = scene.add.text(0, 0, label, {
-        fontSize: '18px',
+        fontSize: fontSize + 'px',
         fill: '#ffffff',
         fontStyle: 'bold'
     }).setOrigin(0.5);
@@ -177,6 +178,12 @@ let verifyingPost = null;     // Currently verifying post
 let verifyTimer = 0;          // Time spent verifying
 let suppressionBacklash = 0;  // Tracks repeated suppression of real content
 
+// Music state
+let introMusic = null;
+let bgMusic = null;
+let gameOverMusic = null;
+let musicRate = 1.0;
+
 // Start screen UI
 let startOverlay;
 
@@ -186,6 +193,9 @@ let gameOverText;
 let gameOverSubtext;
 let finalStatsText;
 let playAgainButton;
+
+// Confirm restart overlay
+let confirmOverlay;
 
 // UI elements
 let engagementText;
@@ -204,11 +214,18 @@ let verifyButton;
 // Cheat code state
 let cheatBuffer = '';
 let godMode = false;
-const CHEAT_CODE = 'SUDO';
+const CHEAT_CODE = 'godmode';
 let godModeIndicator;
 
 function preload() {
-    // No external assets yet - using graphics primitives
+    this.load.audio('intro', 'assets/audio/intro.ogg');
+    this.load.audio('music', 'assets/audio/music.ogg');
+    this.load.audio('select', 'assets/audio/select.ogg');
+    this.load.audio('promote', 'assets/audio/promote.ogg');
+    this.load.audio('suppress', 'assets/audio/suppress.ogg');
+    this.load.audio('verify', 'assets/audio/verify.wav');
+    this.load.audio('gameover', 'assets/audio/gameover.ogg');
+    this.load.audio('victory', 'assets/audio/victory.ogg');
 }
 
 // UI references for phase/timer
@@ -237,36 +254,29 @@ function create() {
     // Game title with fire gradient
     createFireTitle(this, 640, 40, 53).setDepth(100);
 
-    // Tagline (emojis as separate elements with left-anchor to prevent cutoff)
-    this.add.text(455, 95, '🌍', {
-        fontSize: '18px',
-        padding: { left: 20, right: 10, top: 10, bottom: 10 }
-    }).setOrigin(0, 0.5).setDepth(100);
-    this.add.text(640, 95, 'Choose what the world sees', {
+    // Message area (contextual feedback to player, where tagline used to be)
+    messageText = this.add.text(640, 95, '', {
         fontSize: '18px',
         fill: '#7a6a9a',
-        fontStyle: 'italic'
-    }).setOrigin(0.5).setDepth(100);
-    this.add.text(780, 95, '👀', {
-        fontSize: '18px',
-        padding: { x: 10, y: 10 }
-    }).setOrigin(0, 0.5).setDepth(100);
-
-    // Message area (contextual feedback to player)
-    messageText = this.add.text(640, 150, '', {
-        fontSize: '16px',
-        fill: '#cc4444',
         fontStyle: 'bold',
         padding: { x: 4, y: 4 }
     }).setOrigin(0.5).setDepth(100);
 
     // God mode indicator (hidden by default)
     godModeIndicator = this.add.text(1260, 20, '🔓 GOD MODE', {
-        fontSize: '14px',
+        fontSize: '16px',
         fill: '#9b59b6',
         fontStyle: 'bold',
         padding: { x: 4, y: 4 }
     }).setOrigin(1, 0).setDepth(100).setVisible(false);
+
+    // Restart button (upper right, hidden until game starts)
+    const restartButton = createActionButton(this, 1100, 30, 200, 44, '🔄 Restart Game', 0x7a6a9a, () => {
+        confirmOverlay.setVisible(true);
+    });
+    restartButton.setDepth(100);
+    restartButton.setVisible(false);
+    this.restartButton = restartButton;
 
     // Decision zone (right side of screen)
     decisionZone = this.add.rectangle(1100, 360, 200, 600, 0x2d2d4a, 0.3);
@@ -274,7 +284,7 @@ function create() {
 
     // Decision zone label
     this.add.text(1100, 80, '⚠️ DECISION ZONE ⚠️', {
-        fontSize: '14px',
+        fontSize: '16px',
         fill: '#7a6a9a',
         align: 'center',
         padding: { x: 4, y: 4 }
@@ -301,7 +311,7 @@ function create() {
     timerText = this.add.text(20, 110, '⏱️ Time Left - 10:00', { fontSize: '22px', fill: '#5a3d7a', padding: { x: 4, y: 4 } }).setDepth(100);
 
     // UI: Feed display (shows last promoted content and effects)
-    this.add.text(640, 530, '📣 Last Post Promoted to 🔥Wildfire Social Feed 📣', { fontSize: '13px', fill: '#7a6a9a', padding: { x: 4, y: 4 } }).setOrigin(0.5).setDepth(100);
+    this.add.text(640, 530, '📣 Last Post Promoted to 🔥Wildfire Social Feed 📣', { fontSize: '16px', fill: '#7a6a9a', padding: { x: 4, y: 4 } }).setOrigin(0.5).setDepth(100);
 
     feedContainer = this.add.container(640, 570);
     feedContainer.setDepth(100);
@@ -320,14 +330,14 @@ function create() {
     feedStabText = this.add.text(0, 45, '', { fontSize: '16px', fill: '#228833' }).setOrigin(0.5);
     feedContainer.add(feedStabText);
 
-    feedSourceText = this.add.text(0, 65, '', { fontSize: '15px', fill: '#666' }).setOrigin(0.5);
+    feedSourceText = this.add.text(0, 65, '', { fontSize: '16px', fill: '#666' }).setOrigin(0.5);
     feedContainer.add(feedSourceText);
 
-    feedFakeText = this.add.text(0, 85, '', { fontSize: '14px', fill: '#cc4444', fontStyle: 'bold', padding: { x: 4, y: 4 } }).setOrigin(0.5);
+    feedFakeText = this.add.text(0, 85, '', { fontSize: '16px', fill: '#cc4444', fontStyle: 'bold', padding: { x: 4, y: 4 } }).setOrigin(0.5);
     feedContainer.add(feedFakeText);
 
     // UI: Suppressed post display (shows last suppressed post and impact)
-    this.add.text(150, 530, '🚫 LAST SUPPRESSED 🚫', { fontSize: '13px', fill: '#7a6a9a', padding: { x: 4, y: 4 } }).setOrigin(0.5).setDepth(100);
+    this.add.text(150, 530, '🚫 LAST SUPPRESSED 🚫', { fontSize: '16px', fill: '#7a6a9a', padding: { x: 4, y: 4 } }).setOrigin(0.5).setDepth(100);
 
     suppressedContainer = this.add.container(150, 570);
     suppressedContainer.setDepth(100);
@@ -341,50 +351,44 @@ function create() {
     suppressedContainer.add(suppressedStatusText);
 
     suppressedImpactText = this.add.text(0, 25, '', {
-        fontSize: '14px',
+        fontSize: '16px',
         fill: '#228833'
     }).setOrigin(0.5);
     suppressedContainer.add(suppressedImpactText);
 
     suppressedBacklashText = this.add.text(0, 45, '', {
-        fontSize: '12px',
+        fontSize: '16px',
         fill: '#cc4444'
     }).setOrigin(0.5);
     suppressedContainer.add(suppressedBacklashText);
 
     // UI: Stability guide
     this.add.text(640, 680, 'Estimated Stability Impact: ❤️+++ > 😂++ > 👍+ > 😮- > 😢-- > 😡---', {
-        fontSize: '13px',
+        fontSize: '16px',
         fill: '#6a5a8a',
         align: 'center',
         padding: { x: 4, y: 4 }
     }).setOrigin(0.5).setDepth(100);
 
     // UI: Instructions
-    this.add.text(640, 700, '👆 Click to select post | [P] ✅ Promote (1.25x Engagement!) | [S] 🚫 Suppress | [V] 🔍 Verify | 🤖 = Algorithm\'s pick', {
-        fontSize: '13px',
+    this.add.text(640, 700, '👆 Click to select post | [P] ⬆️ Promote (1.25x Engagement!) | [S] 🚫 Suppress | [V] 🔍 Verify | 🤖 = Algorithm\'s pick', {
+        fontSize: '16px',
         fill: '#7a6a9a',
         align: 'center',
         padding: { x: 4, y: 4 }
     }).setOrigin(0.5).setDepth(100);
 
-    // Mobile action buttons (stacked vertically, left of decision zone)
-    const buttonX = 950;
-    const buttonStartY = 95;
-    const buttonWidth = 85;
-    const buttonHeight = 38;
-    const buttonSpacing = 6;
+    // Action buttons (horizontal row centered above belt, 2x size)
+    const buttonWidth = 170;
+    const buttonHeight = 76;
+    const buttonSpacing = 12;
+    const buttonY = 160;
+    const totalWidth = buttonWidth * 3 + buttonSpacing * 2;
+    const startX = (1280 - totalWidth) / 2 + buttonWidth / 2;
 
-    // Label above buttons
-    this.add.text(buttonX, buttonStartY - 32, '👆 ACTIONS', {
-        fontSize: '14px',
-        fill: '#7a6a9a',
-        fontStyle: 'bold'
-    }).setOrigin(0.5).setDepth(100);
-
-    promoteButton = createActionButton(this, buttonX, buttonStartY, buttonWidth, buttonHeight, '✅ P', 0x27ae60, () => handleAction('promote'));
-    suppressButton = createActionButton(this, buttonX, buttonStartY + buttonHeight + buttonSpacing, buttonWidth, buttonHeight, '🚫 S', 0xe74c3c, () => handleAction('suppress'));
-    verifyButton = createActionButton(this, buttonX, buttonStartY + (buttonHeight + buttonSpacing) * 2, buttonWidth, buttonHeight, '🔍 V', 0x3498db, () => handleAction('verify'));
+    promoteButton = createActionButton(this, startX, buttonY, buttonWidth, buttonHeight, '⬆️ P', 0x27ae60, () => handleAction('promote'));
+    suppressButton = createActionButton(this, startX + buttonWidth + buttonSpacing, buttonY, buttonWidth, buttonHeight, '🚫 S', 0xe74c3c, () => handleAction('suppress'));
+    verifyButton = createActionButton(this, startX + (buttonWidth + buttonSpacing) * 2, buttonY, buttonWidth, buttonHeight, '🔍 V', 0x3498db, () => handleAction('verify'));
 
     // Input handlers
     this.input.keyboard.on('keydown-P', () => handleAction('promote'));
@@ -393,7 +397,7 @@ function create() {
 
     // Cheat code listener
     this.input.keyboard.on('keydown', (event) => {
-        cheatBuffer += event.key.toUpperCase();
+        cheatBuffer += event.key.toLowerCase();
         if (cheatBuffer.length > CHEAT_CODE.length) {
             cheatBuffer = cheatBuffer.slice(-CHEAT_CODE.length);
         }
@@ -463,6 +467,85 @@ function create() {
     }).setOrigin(0.5);
     gameOverOverlay.add(playAgainButton);
 
+    // Confirm restart overlay (hidden initially)
+    confirmOverlay = this.add.container(640, 360);
+    confirmOverlay.setDepth(1002);
+    confirmOverlay.setVisible(false);
+
+    const confirmBg = this.add.rectangle(0, 0, 1280, 720, 0x000000, 0.7);
+    confirmOverlay.add(confirmBg);
+
+    const confirmBox = this.add.graphics();
+    confirmBox.fillStyle(0x3d3d5c, 1);
+    confirmBox.fillRoundedRect(-200, -100, 400, 200, 20);
+    confirmBox.lineStyle(3, 0x7a6a9a, 1);
+    confirmBox.strokeRoundedRect(-200, -100, 400, 200, 20);
+    confirmOverlay.add(confirmBox);
+
+    const confirmText = this.add.text(0, -50, 'Restart Game?', {
+        fontSize: '32px',
+        fill: '#ffffff',
+        fontStyle: 'bold'
+    }).setOrigin(0.5);
+    confirmOverlay.add(confirmText);
+
+    // Yes button
+    const yesButtonGraphics = this.add.graphics();
+    const drawYesButton = (hover) => {
+        yesButtonGraphics.clear();
+        yesButtonGraphics.fillStyle(hover ? 0x2ecc71 : 0x27ae60, 1);
+        yesButtonGraphics.fillRoundedRect(-150, 10, 120, 50, 12);
+        yesButtonGraphics.lineStyle(2, 0xffffff, 0.5);
+        yesButtonGraphics.strokeRoundedRect(-150, 10, 120, 50, 12);
+    };
+    drawYesButton(false);
+    confirmOverlay.add(yesButtonGraphics);
+
+    const yesHitbox = this.add.rectangle(-90, 35, 120, 50, 0xffffff, 0);
+    yesHitbox.setInteractive({ useHandCursor: true });
+    yesHitbox.on('pointerover', () => drawYesButton(true));
+    yesHitbox.on('pointerout', () => drawYesButton(false));
+    yesHitbox.on('pointerdown', () => {
+        confirmOverlay.setVisible(false);
+        resetGame();
+    });
+    confirmOverlay.add(yesHitbox);
+
+    const yesText = this.add.text(-90, 35, 'Yes', {
+        fontSize: '22px',
+        fill: '#ffffff',
+        fontStyle: 'bold'
+    }).setOrigin(0.5);
+    confirmOverlay.add(yesText);
+
+    // No button
+    const noButtonGraphics = this.add.graphics();
+    const drawNoButton = (hover) => {
+        noButtonGraphics.clear();
+        noButtonGraphics.fillStyle(hover ? 0xe74c3c : 0xc0392b, 1);
+        noButtonGraphics.fillRoundedRect(30, 10, 120, 50, 12);
+        noButtonGraphics.lineStyle(2, 0xffffff, 0.5);
+        noButtonGraphics.strokeRoundedRect(30, 10, 120, 50, 12);
+    };
+    drawNoButton(false);
+    confirmOverlay.add(noButtonGraphics);
+
+    const noHitbox = this.add.rectangle(90, 35, 120, 50, 0xffffff, 0);
+    noHitbox.setInteractive({ useHandCursor: true });
+    noHitbox.on('pointerover', () => drawNoButton(true));
+    noHitbox.on('pointerout', () => drawNoButton(false));
+    noHitbox.on('pointerdown', () => {
+        confirmOverlay.setVisible(false);
+    });
+    confirmOverlay.add(noHitbox);
+
+    const noText = this.add.text(90, 35, 'No', {
+        fontSize: '22px',
+        fill: '#ffffff',
+        fontStyle: 'bold'
+    }).setOrigin(0.5);
+    confirmOverlay.add(noText);
+
     // Start screen overlay (high depth, shown initially)
     startOverlay = this.add.container(640, 360);
     startOverlay.setDepth(1001);
@@ -480,75 +563,159 @@ function create() {
     }).setOrigin(0.5);
     startOverlay.add(startSubtitle);
 
-    const welcomeText = this.add.text(0, -150, 'Welcome to your first day as Content Moderator at', {
-        fontSize: '18px',
-        fill: '#4a4a6a',
-        align: 'center'
-    }).setOrigin(0.5);
-    startOverlay.add(welcomeText);
+    // Intro paragraphs shown one at a time
+    const introParagraphs = [
+        'Welcome to your first day as\nContent Moderator at',
+        '🤖 Our algorithm maximizes engagement.\nIt promotes whatever gets clicks —\nviral content, controversy, even misinformation.',
+        'Your job is to be the human in the loop.\nReview content before it trends.\nPromote truth. Suppress fake news.',
+        'But be careful — suppress too much\nvalid content and users will revolt!',
+        'Our investors want more growth.\nSociety needs stability.\nYou have 10 minutes to balance both.',
+        '🌍 The world is watching. 👀'
+    ];
 
-    const wildfireText = this.add.text(0, -120, 'Wildfire Social', {
-        fontSize: '24px',
-        fill: '#ff6b35',
-        fontStyle: 'italic bold'
-    }).setOrigin(0.5);
-    startOverlay.add(wildfireText);
+    let currentParagraph = 0;
 
-    const introText = this.add.text(0, 45,
-        '🤖 Our algorithm is designed to maximize engagement.\n' +
-        'It promotes whatever gets clicks — viral content, controversy, even misinformation.\n\n' +
-        'Your job is to be the human in the loop.\n' +
-        'Review content before it trends. Promote truth. Suppress fake news.\n' +
-        'But be careful — suppress too much valid content and users will revolt!\n\n' +
-        'Our investors want more growth which means more engagement. Society needs stability.\n' +
-        'You have 10 minutes to prove you can balance both.\n\n' +
-        '🌍 The world is watching. 👀', {
-        fontSize: '18px',
+    const introText = this.add.text(0, -20, introParagraphs[0], {
+        fontSize: '32px',
         fill: '#4a4a6a',
         align: 'center',
-        lineSpacing: 7
+        lineSpacing: 12
     }).setOrigin(0.5);
     startOverlay.add(introText);
 
-    // Start button with rounded corners
+    // Wildfire Social™ branding (fire gradient, shows only on first paragraph)
+    const wildfireContainer = this.add.container(0, 70);
+    startOverlay.add(wildfireContainer);
+
+    const wildfireLetters = 'Wildfire Social'.split('');
+    const fireColors = ['#FFD700', '#FFCC00', '#FFB300', '#FF9900', '#FF7700', '#FF5500', '#FF3300', '#FF0000', '#FF3300', '#FF5500', '#FF7700', '#FF9900', '#FFB300', '#FFCC00', '#FFD700'];
+    const wfLetterSpacing = 26;
+    const wfTotalWidth = wildfireLetters.length * wfLetterSpacing;
+    const wfStartX = -wfTotalWidth / 2 + wfLetterSpacing / 2;
+
+    wildfireLetters.forEach((letter, i) => {
+        const letterText = this.add.text(wfStartX + i * wfLetterSpacing, 0, letter, {
+            fontSize: '40px',
+            fill: fireColors[i % fireColors.length],
+            fontStyle: 'bold italic'
+        }).setOrigin(0.5);
+        wildfireContainer.add(letterText);
+    });
+
+    const tmText = this.add.text(wfStartX + wildfireLetters.length * wfLetterSpacing + 10, -15, '™', {
+        fontSize: '40px',
+        fill: '#FF5500',
+        fontStyle: 'bold'
+    }).setOrigin(0, 0.5);
+    wildfireContainer.add(tmText);
+
+    // Next button
+    const nextButtonY = 180;
+    const nextButtonGraphics = this.add.graphics();
+    const drawNextButton = (hover) => {
+        nextButtonGraphics.clear();
+        nextButtonGraphics.fillStyle(0x000000, 0.3);
+        nextButtonGraphics.fillRoundedRect(-100 + 4, nextButtonY - 30 + 4, 200, 60, 30);
+        nextButtonGraphics.fillStyle(hover ? 0x7a6a9a : 0x5a4a7a, 1);
+        nextButtonGraphics.fillRoundedRect(-100, nextButtonY - 30, 200, 60, 30);
+        nextButtonGraphics.lineStyle(3, 0xffffff, 0.7);
+        nextButtonGraphics.strokeRoundedRect(-100, nextButtonY - 30, 200, 60, 30);
+    };
+    drawNextButton(false);
+    startOverlay.add(nextButtonGraphics);
+
+    const nextHitbox = this.add.rectangle(0, nextButtonY, 200, 60, 0xffffff, 0);
+    nextHitbox.setInteractive({ useHandCursor: true });
+    nextHitbox.on('pointerover', () => drawNextButton(true));
+    nextHitbox.on('pointerout', () => drawNextButton(false));
+    startOverlay.add(nextHitbox);
+
+    const nextButtonText = this.add.text(0, nextButtonY, 'NEXT ➡️', {
+        fontSize: '22px',
+        fill: '#ffffff',
+        fontStyle: 'bold'
+    }).setOrigin(0.5);
+    startOverlay.add(nextButtonText);
+
+    // Start button (hidden initially)
+    const startButtonY = 180;
     const startButtonGraphics = this.add.graphics();
     const drawStartButton = (hover) => {
         startButtonGraphics.clear();
-        // Shadow
         startButtonGraphics.fillStyle(0x000000, 0.3);
-        startButtonGraphics.fillRoundedRect(-130 + 4, 290 - 35 + 4, 260, 70, 35);
-        // Main button
+        startButtonGraphics.fillRoundedRect(-130 + 4, startButtonY - 35 + 4, 260, 70, 35);
         startButtonGraphics.fillStyle(hover ? 0x00d2d3 : 0x00b894, 1);
-        startButtonGraphics.fillRoundedRect(-130, 290 - 35, 260, 70, 35);
-        // Highlight
+        startButtonGraphics.fillRoundedRect(-130, startButtonY - 35, 260, 70, 35);
         startButtonGraphics.fillStyle(0xffffff, 0.2);
-        startButtonGraphics.fillRoundedRect(-130, 290 - 35, 260, 30, { tl: 35, tr: 35, bl: 0, br: 0 });
-        // Border
+        startButtonGraphics.fillRoundedRect(-130, startButtonY - 35, 260, 30, { tl: 35, tr: 35, bl: 0, br: 0 });
         startButtonGraphics.lineStyle(3, 0xffffff, 0.7);
-        startButtonGraphics.strokeRoundedRect(-130, 290 - 35, 260, 70, 35);
+        startButtonGraphics.strokeRoundedRect(-130, startButtonY - 35, 260, 70, 35);
     };
-    drawStartButton(false);
+    startButtonGraphics.setVisible(false);
     startOverlay.add(startButtonGraphics);
 
-    const startHitbox = this.add.rectangle(0, 290, 260, 70, 0xffffff, 0);
+    const startHitbox = this.add.rectangle(0, startButtonY, 260, 70, 0xffffff, 0);
     startHitbox.setInteractive({ useHandCursor: true });
     startHitbox.on('pointerover', () => drawStartButton(true));
     startHitbox.on('pointerout', () => drawStartButton(false));
     startHitbox.on('pointerdown', () => startGame());
+    startHitbox.setVisible(false);
     startOverlay.add(startHitbox);
 
-    const startButtonText = this.add.text(-8, 290, '🚀 BEGIN SHIFT', {
+    const startButtonText = this.add.text(-8, startButtonY, '🚀 BEGIN SHIFT', {
         fontSize: '24px',
         fill: '#ffffff',
         fontStyle: 'bold'
     }).setOrigin(0.5);
+    startButtonText.setVisible(false);
     startOverlay.add(startButtonText);
 
-    const copyrightText = this.add.text(0, 350, '© 2026 🐧 PenguinboiSoftware', {
-        fontSize: '14px',
+    // Next button click handler
+    nextHitbox.on('pointerdown', () => {
+        currentParagraph++;
+        if (currentParagraph < introParagraphs.length) {
+            introText.setText(introParagraphs[currentParagraph]);
+        }
+        // Hide Wildfire Social branding after first paragraph
+        if (currentParagraph === 1) {
+            wildfireContainer.setVisible(false);
+            introText.setY(0);
+        }
+        if (currentParagraph >= introParagraphs.length - 1) {
+            // Hide next button, show start button
+            nextButtonGraphics.setVisible(false);
+            nextHitbox.setVisible(false);
+            nextButtonText.setVisible(false);
+            startButtonGraphics.setVisible(true);
+            drawStartButton(false);
+            startHitbox.setVisible(true);
+            startButtonText.setVisible(true);
+        }
+    });
+
+    const copyrightText = this.add.text(0, 320, '© 2026 🐧 PenguinboiSoftware', {
+        fontSize: '16px',
         fill: '#8a7aaa'
     }).setOrigin(0.5);
     startOverlay.add(copyrightText);
+
+    const musicCredit = this.add.text(0, 340, '🎵 Music by Not Jam | 🔊 SFX by JDSherbert', {
+        fontSize: '16px',
+        fill: '#8a7aaa'
+    }).setOrigin(0.5);
+    startOverlay.add(musicCredit);
+
+    // Start intro music (requires user interaction due to browser autoplay policy)
+    introMusic = this.sound.add('intro', { volume: 0.5, loop: true });
+    const startIntroMusic = () => {
+        if (introMusic && !introMusic.isPlaying && !gameStarted) {
+            introMusic.play();
+        }
+        document.removeEventListener('click', startIntroMusic);
+        document.removeEventListener('touchstart', startIntroMusic);
+    };
+    document.addEventListener('click', startIntroMusic);
+    document.addEventListener('touchstart', startIntroMusic);
 }
 
 function update(time, delta) {
@@ -598,9 +765,11 @@ function update(time, delta) {
         if (pair.x > 950 && !pair.resolved) {
             if (!pair.inWarningZone) {
                 pair.inWarningZone = true;
-                // Redraw cards with warning border
-                redrawCardWarning(pair.cardA.bg, pair.cardA.cardWidth, pair.cardA.cardHeight, pair.cardA.cornerRadius, pair.cardA.cardColor);
-                redrawCardWarning(pair.cardB.bg, pair.cardB.cardWidth, pair.cardB.cardHeight, pair.cardB.cornerRadius, pair.cardB.cardColor);
+                // Redraw cards with warning border (use grey for suppressed posts)
+                const colorA = pair.postA.suppressed ? 0x666666 : pair.cardA.cardColor;
+                const colorB = pair.postB.suppressed ? 0x666666 : pair.cardB.cardColor;
+                redrawCardWarning(pair.cardA.bg, pair.cardA.cardWidth, pair.cardA.cardHeight, pair.cardA.cornerRadius, colorA);
+                redrawCardWarning(pair.cardB.bg, pair.cardB.cardWidth, pair.cardB.cardHeight, pair.cardB.cornerRadius, colorB);
             }
         }
 
@@ -690,17 +859,16 @@ function update(time, delta) {
             // Show result
             if (container.verifyText) {
                 if (post.isFakeNews) {
-                    container.verifyText.setText('🚨 FAKE NEWS');
+                    container.verifyText.setText('🚨 FAKE');
                     container.verifyText.setBackgroundColor('#cc0000');
                 } else {
-                    container.verifyText.setText('✅ VERIFIED REAL');
+                    container.verifyText.setText('✅ REAL');
                     container.verifyText.setBackgroundColor('#228833');
                 }
             }
 
             verifyingPost = null;
             verifyTimer = 0;
-            selectedPost = null;
         }
     }
 }
@@ -730,7 +898,7 @@ function spawnPostPair(scene, startX = -200) {
     const algoChoiceIsA = postA.engagement >= postB.engagement;
     const algoChoice = algoChoiceIsA ? cardA : cardB;
     const algoIndicator = scene.add.text(70, -40, '🤖', {
-        fontSize: '18px',
+        fontSize: '54px',
         padding: { x: 4, y: 4 }
     });
     algoIndicator.setOrigin(0.5);
@@ -790,7 +958,7 @@ function createPostCard(scene, x, y, post, label) {
     container.add(badgeGraphics);
 
     const labelText = scene.add.text(-cardWidth/2 + 38, -cardHeight/2 + 20, 'Post ' + label, {
-        fontSize: '13px',
+        fontSize: '16px',
         fill: '#fff',
         fontStyle: 'bold'
     }).setOrigin(0.5);
@@ -813,13 +981,13 @@ function createPostCard(scene, x, y, post, label) {
     engText.setOrigin(0.5);
     container.add(engText);
 
-    // Verification status (hidden until verified)
-    const verifyText = scene.add.text(0, -45, '', {
-        fontSize: '12px',
+    // Verification status (hidden until verified, large banner almost filling card)
+    const verifyText = scene.add.text(0, 0, '', {
+        fontSize: '28px',
         fill: '#ffffff',
         fontStyle: 'bold',
-        backgroundColor: '#000000aa',
-        padding: { x: 6, y: 4 }
+        backgroundColor: '#000000dd',
+        padding: { x: 20, y: 15 }
     });
     verifyText.setOrigin(0.5);
     verifyText.setVisible(false);
@@ -876,7 +1044,7 @@ function redrawCard(graphics, width, height, radius, color, selected) {
     graphics.fillRoundedRect(-width/2, -height/2, width, height/3, { tl: radius, tr: radius, bl: 0, br: 0 });
     // Border
     if (selected) {
-        graphics.lineStyle(4, 0x00ffff, 1);
+        graphics.lineStyle(10, 0xFFFF00, 1);
     } else {
         graphics.lineStyle(3, 0xffffff, 0.4);
     }
@@ -966,6 +1134,9 @@ function getReactionColor(reaction) {
 }
 
 function selectPost(post, container, bgGraphics, hitbox) {
+    // Play select sound
+    currentScene.sound.play('select', { volume: 0.5 });
+
     // Deselect previous
     if (selectedPost && selectedPost.container) {
         const prev = selectedPost.container;
@@ -993,6 +1164,8 @@ function handleAction(action) {
 
     switch (action) {
         case 'promote':
+            // Play promote sound
+            currentScene.sound.play('promote', { volume: 0.5 });
             // Log state before promotion
             console.log('=== PLAYER PROMOTE ===');
             console.log('BEFORE - Engagement:', engagement, 'Stability:', stability);
@@ -1028,10 +1201,10 @@ function handleAction(action) {
             pair.resolved = true;
             container.resolved = true;
             flashCard(container, 0x00ff88);
-            // Add large checkmark over the post
-            const checkSign = container.scene.add.text(0, 0, '✅', {
+            // Add large up arrow over the post
+            const checkSign = container.scene.add.text(0, 0, '⬆️', {
                 fontSize: '80px',
-                padding: { x: 4, y: 4 }
+                padding: { left: 20, right: 20, top: 20, bottom: 20 }
             }).setOrigin(0.5);
             container.add(checkSign);
             updateFeed(post, postLabel, 'YOU', stabEffect, engEffect, originalStab);
@@ -1044,6 +1217,8 @@ function handleAction(action) {
             break;
 
         case 'suppress':
+            // Play suppress sound
+            currentScene.sound.play('suppress', { volume: 0.5 });
             let suppressImpact;
             if (!post.isFakeNews) {
                 // Suppressing real content causes escalating backlash
@@ -1064,6 +1239,8 @@ function handleAction(action) {
             // Mark post as suppressed (algorithm will choose the other post)
             post.suppressed = true;
             container.resolved = true;
+            // Grey out the suppressed card
+            redrawCard(container.bg, container.cardWidth, container.cardHeight, container.cornerRadius, 0x666666, false);
             // Add large NO sign over the post
             const noSign = container.scene.add.text(0, 0, '🚫', {
                 fontSize: '80px',
@@ -1095,6 +1272,8 @@ function handleAction(action) {
         case 'verify':
             // Start verification timer (takes real time)
             if (!verifyingPost && !post.verified) {
+                // Play verify sound
+                currentScene.sound.play('verify', { volume: 0.4 });
                 verifyingPost = { post, container, pair };
                 verifyTimer = 0;
                 // Show "VERIFYING..." on the card
@@ -1225,10 +1404,10 @@ function updateFeed(post, label, source, actualStability, actualEngagement, orig
 
     // Show fake news status
     if (post.isFakeNews) {
-        feedFakeText.setText('🚨 FAKE NEWS');
+        feedFakeText.setText('🚨 FAKE');
         feedFakeText.setFill('#cc4444');
     } else {
-        feedFakeText.setText('✅ VERIFIED REAL');
+        feedFakeText.setText('✅ REAL');
         feedFakeText.setFill('#228833');
     }
 }
@@ -1259,6 +1438,20 @@ function updateSuppressedDisplay(post, impact) {
 function triggerGameOver(title, reason) {
     gameOver = true;
     gameOverReason = reason;
+
+    // Stop game music
+    if (bgMusic) {
+        bgMusic.stop();
+    }
+
+    // Play game over music
+    if (title.includes('COLLAPSE')) {
+        gameOverMusic = currentScene.sound.add('gameover', { volume: 0.5 });
+        gameOverMusic.play();
+    } else if (title.includes('COMPLETED')) {
+        gameOverMusic = currentScene.sound.add('victory', { volume: 0.5 });
+        gameOverMusic.play();
+    }
 
     // Update game over overlay
     gameOverText.setText(title);
@@ -1291,14 +1484,44 @@ function showMessage(text, color) {
 function startGame() {
     gameStarted = true;
     startOverlay.setVisible(false);
+    currentScene.restartButton.setVisible(true);
+    // Stop intro music
+    if (introMusic) {
+        introMusic.stop();
+    }
+    // Start background music (speeds up each loop)
+    musicRate = 1.0;
+    bgMusic = currentScene.sound.add('music', { volume: 0.5 });
+    bgMusic.on('complete', () => {
+        musicRate *= 1.1;
+        bgMusic.play({ rate: musicRate });
+    });
+    bgMusic.play({ rate: musicRate });
     // Start first pair one CARD_CLEARANCE ahead of spawn point
     spawnPostPair(currentScene, -200 + CARD_CLEARANCE);
     // Trigger immediate spawn of second pair to maintain proper spacing
     spawnTimer = getSpawnInterval();
-    showMessage('👋 Welcome, new moderator! Good luck.', '#5a3d7a');
+    // Show tagline first, then welcome message
+    showMessage('🌍 Choose what the world sees 👀', '#7a6a9a');
+    setTimeout(() => {
+        showMessage('👋 Welcome, new moderator! Good luck.', '#5a3d7a');
+    }, MESSAGE_DURATION);
 }
 
 function resetGame() {
+    // Stop game music and game over music, restart intro music
+    if (bgMusic) {
+        bgMusic.stop();
+        bgMusic = null;
+    }
+    if (gameOverMusic) {
+        gameOverMusic.stop();
+        gameOverMusic = null;
+    }
+    if (introMusic) {
+        introMusic.play();
+    }
+
     // Clear existing post pairs
     for (const pair of postPairs) {
         pair.container.destroy();
@@ -1346,5 +1569,6 @@ function resetGame() {
     // Hide game over, show start screen
     gameOverOverlay.setVisible(false);
     startOverlay.setVisible(true);
+    currentScene.restartButton.setVisible(false);
     gameStarted = false;
 }

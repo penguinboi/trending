@@ -214,9 +214,27 @@ Win if:
 * Emojis throughout UI for playful tone:
   * Reactions: 👍 Like, ❤️ Love, 😂 Haha, 😮 Wow, 😢 Sad, 😡 Angry
   * UI elements: 📈 Engagement, ⚖️ Stability, 🎯 Phase, ⏱️ Time
-  * 🤖 indicator shows algorithm's automatic choice (moves when suppressing)
-  * Player actions: ✅ promote overlay, 🚫 suppress overlay
-  * Verification status: ⏳ verifying, ✅ verified real, 🚨 fake news, ❓ no time
+  * Large 🤖 indicator (54px) shows algorithm's automatic choice (moves when suppressing)
+  * Player actions: ⬆️ promote overlay, 🚫 suppress overlay
+  * Verification status: ⏳ verifying, ✅ REAL, 🚨 FAKE, ❓ no time
+
+* Restart button in upper right during gameplay (with confirmation dialog)
+
+* Large action buttons centered horizontally above the belt (170x76 pixels)
+
+* Suppressed posts are greyed out
+
+* Selected post highlight: thick yellow border (10px)
+
+* Verification banners fill most of the card (28px font)
+
+* Minimum font size of 16px throughout for readability
+
+* Stepped intro sequence: paragraphs shown one at a time with NEXT button
+
+* Wildfire Social™ branding with fire gradient on first intro paragraph
+
+* Credits displayed on start screen
 
 * Card colors match reaction type (blue=like, pink=love, yellow=haha, etc.)
 
@@ -239,13 +257,17 @@ Win if:
 
 ### **Sound Design**
 
-* Current build: No audio (silent gameplay)
+* Intro music: Loops on title screen, stops when game starts
 
-* Future consideration: UI feedback sounds for selections and decisions
+* Background music: "Switch With Me Theme" looping track, speeds up 10% each loop to build tension
 
-* Ambient tone to build tension as phases progress
+* Game over music: Different tracks for collapse vs victory outcomes
 
-* Audio cues when posts enter decision zone
+* Sound effects for all player actions: select, promote, suppress, verify
+
+**Music Credit:** [Not Jam Music Pack](https://not-jam.itch.io/not-jam-music-pack) by Not Jam
+
+**SFX Credit:** [Ultimate UI SFX Pack](https://jdsherbert.itch.io/) by JDSherbert
 
 ---
 
@@ -261,9 +283,9 @@ Win if:
 
 * **Dependencies:** None beyond Phaser CDN
 
-* **Input:** Mouse/touch with dual control schemes:
-  * Desktop: Click to select, keyboard P/S/V for actions
-  * Mobile: Click to select, on-screen action buttons (stacked vertically left of decision zone)
+* **Input:** Mouse/touch with keyboard shortcuts
+  * Click to select post, keyboard P/S/V for actions
+  * Large on-screen action buttons centered above belt (work on all devices)
 
 ---
 
