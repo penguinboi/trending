@@ -1,10 +1,12 @@
 ## **TRENDING**
 
+**Created by:** PenguinboiSoftware
+
 Genre: Strategy / Simulation
 
 Platform: Browser
 
-Session Length: 10–15 minutes
+Session Length: 10 minutes
 
 ---
 
@@ -320,5 +322,13 @@ The world is watching—but it only sees what the system expects to perform best
 
 Truth, harm, and attention are inseparable.
 
-When humans can’t keep up, the algorithm decides.
+When humans can't keep up, the algorithm decides.
+
+---
+
+### **License**
+
+© 2026 PenguinboiSoftware. All rights reserved.
+
+Music and SFX used under their respective licenses (see Sound Design).
 
