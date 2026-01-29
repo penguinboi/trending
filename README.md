@@ -14,7 +14,7 @@ You are a Content Moderator at *Wildfire Social*, a major social media platform.
 
 - **Click** a post card to select it
 - **[P] Promote** - Push content to the feed (1.25x impact bonus!)
-- **[S] Suppress** - Block content (escalating backlash if it wasn't fake news!)
+- **[S] Suppress** - Block content (backlash if it wasn't fake news!)
 - **[V] Verify** - Check if content is real or fake (takes 2 seconds!)
 
 **Touch/Click:** Use the large on-screen action buttons centered above the belt.
@@ -22,6 +22,18 @@ You are a Content Moderator at *Wildfire Social*, a major social media platform.
 **Restart:** Click the restart button in the upper right to start over.
 
 If you don't act, the algorithm decides for you - and it always chooses maximum engagement.
+
+## 🎚️ Difficulty Modes
+
+Choose your challenge level before starting:
+
+| Mode | Speed | Start Stability | Backlash |
+|------|-------|-----------------|----------|
+| 🌴 Chill | 0.75x | 120% | Flat (-1 per mistake) |
+| ⚖️ Normal | 1.0x | 100% | Escalating (-1, -2, -3...) |
+| 🔥 Chaos | 1.3x | 80% | 2x Escalating (-2, -4, -6...) |
+
+**Chill** is great for learning. **Normal** is the intended experience. **Chaos** is for masochists.
 
 ## 📊 Reaction Types
 

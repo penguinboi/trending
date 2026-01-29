@@ -134,15 +134,34 @@ The player must decide: verify to make informed decisions, or act quickly on ins
 
 ---
 
+### **Difficulty Modes**
+
+Players choose a difficulty mode before starting:
+
+| Mode | Speed | Starting Stability | Backlash | Description |
+|------|-------|-------------------|----------|-------------|
+| 🌴 Chill | 0.75x | 120% | Flat (-1) | Relaxed pace, forgiving penalties, extra stability |
+| ⚖️ Normal | 1.0x | 100% | Escalating | Balanced pace, standard penalties, the intended experience |
+| 🔥 Chaos | 1.3x | 80% | 2x Escalating | Overwhelming pace, harsh penalties, good luck |
+
+* Difficulty selection appears after reading the intro paragraphs
+* Selected mode is highlighted with a yellow border
+* Final stats screen shows which difficulty was played
+
+---
+
 ### **Suppression Backlash**
 
 * Suppressing fake news is stabilizing (+1 stability)
 
-* Suppressing legitimate content causes escalating backlash (-1, -2, -3... per mistake)
+* Suppressing legitimate content causes backlash (severity depends on difficulty mode):
+  * **Chill:** Flat -1 per mistake (forgiving)
+  * **Normal:** Escalating -1, -2, -3... per consecutive mistake
+  * **Chaos:** Escalating -2, -4, -6... per consecutive mistake (2x multiplier)
 
 * Backlash represents public distrust of platform censorship
 
-* Censorship backlash counter tracks consecutive mistakes
+* Censorship backlash counter tracks consecutive mistakes (displayed only in escalating modes)
 
 * Without verification, suppression is a gamble
 
@@ -150,7 +169,7 @@ The player must decide: verify to make informed decisions, or act quickly on ins
 
 * Shows 🚫 overlay on suppressed post, 🤖 indicator moves to promoted post
 
-Players cannot censor their way to stability—guessing wrong makes things progressively worse.
+Players cannot censor their way to stability—guessing wrong makes things progressively worse (especially on higher difficulties).
 
 ---
 

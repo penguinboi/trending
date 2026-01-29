@@ -34,6 +34,25 @@ let currentPhase = 0;
 // Difficulty scaling - belt speeds per phase (index 0-9)
 const PHASE_SPEEDS = [24, 36, 52, 72, 96, 124, 156, 192, 232, 280];
 
+// Difficulty modes (verifyTime is 2000ms for all modes to match the 2-second sound effect)
+const DIFFICULTY_MODES = {
+    chill:  { name: 'Chill',  speedMult: 0.75, startStability: 120, verifyTime: 2000, backlashFlat: true,  backlashMult: 1 },
+    normal: { name: 'Normal', speedMult: 1.0,  startStability: 100, verifyTime: 2000, backlashFlat: false, backlashMult: 1 },
+    chaos:  { name: 'Chaos',  speedMult: 1.3,  startStability: 80,  verifyTime: 2000, backlashFlat: false, backlashMult: 2 }
+};
+
+const DIFFICULTY_DESCRIPTIONS = {
+    chill:  'Relaxed pace • Forgiving penalties • Extra stability',
+    normal: 'Balanced pace • Standard penalties • The intended experience',
+    chaos:  'Overwhelming pace • Harsh penalties • Good luck'
+};
+
+let currentDifficulty = 'normal';
+
+function getDifficulty() {
+    return DIFFICULTY_MODES[currentDifficulty];
+}
+
 // Card spacing: 180px card + 40px gap = 220px clearance
 const CARD_CLEARANCE = 220;
 
@@ -172,8 +191,7 @@ let gameOverReason = '';
 let gameStarted = false;
 let currentScene = null;
 
-// Verification state
-const VERIFY_DURATION = 2000; // 2 seconds to verify
+// Verification state (duration now comes from getDifficulty().verifyTime)
 let verifyingPost = null;     // Currently verifying post
 let verifyTimer = 0;          // Time spent verifying
 let suppressionBacklash = 0;  // Tracks repeated suppression of real content
@@ -644,8 +662,90 @@ function create() {
     }).setOrigin(0.5);
     startOverlay.add(nextButtonText);
 
+    // Difficulty mode selection (hidden initially)
+    const modeButtonY = 100;
+    const modeButtonWidth = 140;
+    const modeButtonHeight = 50;
+    const modeButtonSpacing = 20;
+    const modes = ['chill', 'normal', 'chaos'];
+    const modeLabels = { chill: '🌴 CHILL', normal: '⚖️ NORMAL', chaos: '🔥 CHAOS' };
+    const modeColors = { chill: 0x27ae60, normal: 0x5a4a7a, chaos: 0xe74c3c };
+    const modeElements = {};
+
+    // Description text (shows what the selected mode does)
+    const difficultyDescText = this.add.text(0, modeButtonY + 50, DIFFICULTY_DESCRIPTIONS.normal, {
+        fontSize: '18px',
+        fill: '#5a4a7a',
+        align: 'center'
+    }).setOrigin(0.5);
+    difficultyDescText.setVisible(false);
+    startOverlay.add(difficultyDescText);
+
+    // Create mode buttons
+    const totalModeWidth = modeButtonWidth * 3 + modeButtonSpacing * 2;
+    const modeStartX = -totalModeWidth / 2 + modeButtonWidth / 2;
+
+    const updateModeSelection = (selectedMode) => {
+        currentDifficulty = selectedMode;
+        difficultyDescText.setText(DIFFICULTY_DESCRIPTIONS[selectedMode]);
+        // Update button visuals
+        modes.forEach((mode) => {
+            const isSelected = mode === selectedMode;
+            const elem = modeElements[mode];
+            elem.drawButton(false, isSelected);
+        });
+    };
+
+    modes.forEach((mode, index) => {
+        const x = modeStartX + index * (modeButtonWidth + modeButtonSpacing);
+        const color = modeColors[mode];
+
+        const graphics = this.add.graphics();
+        const drawButton = (hover, selected) => {
+            graphics.clear();
+            // Shadow
+            graphics.fillStyle(0x000000, 0.3);
+            graphics.fillRoundedRect(x - modeButtonWidth/2 + 3, modeButtonY - modeButtonHeight/2 + 3, modeButtonWidth, modeButtonHeight, 12);
+            // Main fill
+            const fillColor = hover ? Phaser.Display.Color.ValueToColor(color).lighten(15).color : color;
+            graphics.fillStyle(fillColor, 1);
+            graphics.fillRoundedRect(x - modeButtonWidth/2, modeButtonY - modeButtonHeight/2, modeButtonWidth, modeButtonHeight, 12);
+            // Selection border
+            if (selected) {
+                graphics.lineStyle(4, 0xFFFF00, 1);
+            } else {
+                graphics.lineStyle(2, 0xffffff, 0.5);
+            }
+            graphics.strokeRoundedRect(x - modeButtonWidth/2, modeButtonY - modeButtonHeight/2, modeButtonWidth, modeButtonHeight, 12);
+        };
+        drawButton(false, mode === 'normal');
+        graphics.setVisible(false);
+        startOverlay.add(graphics);
+
+        const hitbox = this.add.rectangle(x, modeButtonY, modeButtonWidth, modeButtonHeight, 0xffffff, 0);
+        hitbox.setInteractive({ useHandCursor: true });
+        hitbox.on('pointerover', () => drawButton(true, currentDifficulty === mode));
+        hitbox.on('pointerout', () => drawButton(false, currentDifficulty === mode));
+        hitbox.on('pointerdown', () => {
+            this.sound.play('select', { volume: 0.5 });
+            updateModeSelection(mode);
+        });
+        hitbox.setVisible(false);
+        startOverlay.add(hitbox);
+
+        const text = this.add.text(x, modeButtonY, modeLabels[mode], {
+            fontSize: '18px',
+            fill: '#ffffff',
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+        text.setVisible(false);
+        startOverlay.add(text);
+
+        modeElements[mode] = { graphics, hitbox, text, drawButton };
+    });
+
     // Start button (hidden initially)
-    const startButtonY = 180;
+    const startButtonY = 210;
     const startButtonGraphics = this.add.graphics();
     const drawStartButton = (hover) => {
         startButtonGraphics.clear();
@@ -693,10 +793,19 @@ function create() {
             introText.setY(0);
         }
         if (currentParagraph >= introParagraphs.length - 1) {
-            // Hide next button, show start button
+            // Hide next button, show difficulty selection and start button
             nextButtonGraphics.setVisible(false);
             nextHitbox.setVisible(false);
             nextButtonText.setVisible(false);
+            // Show mode buttons
+            modes.forEach((mode) => {
+                const elem = modeElements[mode];
+                elem.graphics.setVisible(true);
+                elem.hitbox.setVisible(true);
+                elem.text.setVisible(true);
+            });
+            difficultyDescText.setVisible(true);
+            // Show start button
             startButtonGraphics.setVisible(true);
             drawStartButton(false);
             startHitbox.setVisible(true);
@@ -753,7 +862,7 @@ function update(time, delta) {
 
     if (newPhase !== currentPhase) {
         currentPhase = newPhase;
-        beltSpeed = PHASE_SPEEDS[currentPhase];
+        beltSpeed = PHASE_SPEEDS[currentPhase] * getDifficulty().speedMult;
         // Reset spawn timer to prevent overlap when interval shortens
         spawnTimer = 0;
         // Play phase sound and show banner
@@ -860,13 +969,13 @@ function update(time, delta) {
         verifyTimer += delta;
 
         // Update progress text
-        const progress = Math.min(100, Math.floor((verifyTimer / VERIFY_DURATION) * 100));
+        const progress = Math.min(100, Math.floor((verifyTimer / getDifficulty().verifyTime) * 100));
         if (verifyingPost.container.verifyText) {
             verifyingPost.container.verifyText.setText(`⏳ ${progress}%`);
         }
 
         // Check if verification complete
-        if (verifyTimer >= VERIFY_DURATION) {
+        if (verifyTimer >= getDifficulty().verifyTime) {
             const { post, container } = verifyingPost;
             post.verified = true;
 
@@ -1235,12 +1344,21 @@ function handleAction(action) {
             currentScene.sound.play('suppress', { volume: 0.5 });
             let suppressImpact;
             if (!post.isFakeNews) {
-                // Suppressing real content causes escalating backlash
+                // Suppressing real content causes backlash (flat or escalating based on difficulty)
+                const diff = getDifficulty();
                 suppressionBacklash++;
-                suppressImpact = -suppressionBacklash; // -1, -2, -3, etc.
+                if (diff.backlashFlat) {
+                    suppressImpact = -1 * diff.backlashMult;
+                } else {
+                    suppressImpact = -suppressionBacklash * diff.backlashMult; // -1, -2, -3... or -2, -4, -6...
+                }
                 stability += suppressImpact;
                 flashCard(container, 0xff4444);
-                showMessage(`⚠️ Censorship backlash! That was real content. (${suppressImpact})`, '#cc4444');
+                if (getDifficulty().backlashFlat) {
+                    showMessage(`⚠️ That was real content! (${suppressImpact})`, '#cc4444');
+                } else {
+                    showMessage(`⚠️ Censorship backlash! That was real content. (${suppressImpact})`, '#cc4444');
+                }
             } else {
                 // Suppressing fake news is good
                 suppressImpact = 1;
@@ -1441,8 +1559,8 @@ function updateSuppressedDisplay(post, impact) {
     suppressedImpactText.setText(`Stability: ${sign}${impact}`);
     suppressedImpactText.setFill(impact >= 0 ? '#228833' : '#cc4444');
 
-    // Show current backlash level
-    if (suppressionBacklash > 0) {
+    // Show current backlash level (only if escalating, not in chill mode)
+    if (suppressionBacklash > 0 && !getDifficulty().backlashFlat) {
         suppressedBacklashText.setText(`⚠️ Censorship Backlash: ${suppressionBacklash}`);
     } else {
         suppressedBacklashText.setText('');
@@ -1471,7 +1589,7 @@ function triggerGameOver(title, reason) {
     gameOverText.setText(title);
     gameOverText.setFill(title === 'TERM COMPLETED' ? '#00ff88' : '#ff4444');
     gameOverSubtext.setText(reason);
-    finalStatsText.setText(`Final Engagement: ${Math.floor(engagement).toLocaleString()}\nFinal Stability: ${Math.floor(stability)}%\nPhase Reached: ${currentPhase + 1}/10`);
+    finalStatsText.setText(`Difficulty: ${getDifficulty().name}\nFinal Engagement: ${Math.floor(engagement).toLocaleString()}\nFinal Stability: ${Math.floor(stability)}%\nPhase Reached: ${currentPhase + 1}/10`);
 
     gameOverOverlay.setVisible(true);
 }
@@ -1526,6 +1644,10 @@ function startGame() {
     gameStarted = true;
     startOverlay.setVisible(false);
     currentScene.restartButton.setVisible(true);
+    // Initialize difficulty-dependent values
+    stability = getDifficulty().startStability;
+    beltSpeed = PHASE_SPEEDS[0] * getDifficulty().speedMult;
+    stabilityText.setText('⚖️ Global Stability - ' + stability + '%');
     // Stop intro music
     if (introMusic) {
         introMusic.stop();
@@ -1572,10 +1694,10 @@ function resetGame() {
     // Reset game state
     gameTimer = 0;
     currentPhase = 0;
-    beltSpeed = PHASE_SPEEDS[0];
+    beltSpeed = PHASE_SPEEDS[0] * getDifficulty().speedMult;
     spawnTimer = 0;
     engagement = 0;
-    stability = 100;
+    stability = getDifficulty().startStability;
     selectedPost = null;
     gameOver = false;
     gameOverReason = '';
@@ -1590,7 +1712,7 @@ function resetGame() {
 
     // Reset UI
     engagementText.setText('📈 User Engagement - 0');
-    stabilityText.setText('⚖️ Global Stability - 100%');
+    stabilityText.setText('⚖️ Global Stability - ' + getDifficulty().startStability + '%');
     stabilityText.setFill('#228833');
     phaseText.setText('🎯 Phase - 1 / 10');
     timerText.setText('⏱️ Time Left - 10:00');
