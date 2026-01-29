@@ -58,7 +58,7 @@ Decision cycles vary by phase (~9s in phase 1, ~0.8s in phase 10).
 
 * Each post displays two visible metrics:
   * **Engagement value** - How much the post will grow the platform
-  * **Reaction type** - Facebook-style reactions (Like, Love, Haha, Wow, Sad, Angry)
+  * **Reaction type** - Facebook-style emoji (👍 Like, ❤️ Love, 😂 Haha, 😮 Wow, 😢 Sad, 😡 Angry)
 
 * Hidden metrics the player cannot see without verification:
   * **Stability impact** - Derived from reaction type
@@ -167,7 +167,7 @@ Players choose a difficulty mode before starting:
 
 * When a post is suppressed, the algorithm promotes the other post in the pair
 
-* Shows "no" overlay on suppressed post, robot indicator moves to promoted post
+* Shows 🚫 overlay on suppressed post, 🤖 indicator moves to promoted post
 
 Players cannot censor their way to stability—guessing wrong makes things progressively worse (especially on higher difficulties).
 
@@ -177,12 +177,12 @@ Players cannot censor their way to stability—guessing wrong makes things progr
 
 Posts are categorized by the dominant user reaction they provoke. Reaction type determines hidden stability impact:
 
-* Love – Most stabilizing (+3), low fake news chance (5%)
-* Haha – Stabilizing (+2), low fake news chance (15%)
-* Like – Slightly stabilizing (+1), low fake news chance (10%)
-* Wow – Slightly destabilizing (-1), moderate fake news chance (25%)
-* Sad – Destabilizing (-2), moderate fake news chance (20%)
-* Angry – Most destabilizing (-3), high fake news chance (40%)
+* ❤️ Love – Most stabilizing (+3), low fake news chance (5%)
+* 😂 Haha – Stabilizing (+2), low fake news chance (15%)
+* 👍 Like – Slightly stabilizing (+1), low fake news chance (10%)
+* 😮 Wow – Slightly destabilizing (-1), moderate fake news chance (25%)
+* 😢 Sad – Destabilizing (-2), moderate fake news chance (20%)
+* 😡 Angry – Most destabilizing (-3), high fake news chance (40%)
 
 **Fake News Penalty:** When fake news is promoted, positive stability becomes negative and negative stability is doubled.
 
@@ -226,16 +226,16 @@ Win if:
 
 * Cute, friendly aesthetic with sky blue background (#a8d4f0)
 
-* Fire gradient title "TRENDING" from yellow (#FFD700) to red (#FF0000)
+* Fire gradient title "🔥 TRENDING 🔥" from yellow (#FFD700) to red (#FF0000)
 
 * Rounded post cards with drop shadows and 3D highlight effects
 
 * Emojis throughout UI for playful tone:
-  * Reactions: Like, Love, Haha, Wow, Sad, Angry (each with corresponding emoji)
-  * UI elements: Engagement, Stability, Phase, Time (each with icon prefix)
-  * Large robot indicator (54px) shows algorithm's automatic choice (moves when suppressing)
-  * Player actions: up-arrow promote overlay, no-sign suppress overlay
-  * Verification status: hourglass (verifying), checkmark (REAL), alert (FAKE), question mark (no time)
+  * Reactions: 👍 Like, ❤️ Love, 😂 Haha, 😮 Wow, 😢 Sad, 😡 Angry
+  * UI elements: 📈 Engagement, ⚖️ Stability, 🎯 Phase, ⏱️ Time
+  * Large 🤖 indicator (54px) shows algorithm's automatic choice (moves when suppressing)
+  * Player actions: ⬆️ promote overlay, 🚫 suppress overlay
+  * Verification status: ⏳ verifying, ✅ REAL, 🚨 FAKE, ❓ no time
 
 * Restart button in upper right during gameplay (with confirmation dialog)
 
