@@ -94,4 +94,6 @@ trending/
 
 ## 📜 License
 
-Made for Pirate Software Game Jam 18. All code is original.
+© 2026 PenguinboiSoftware. All rights reserved.
+
+Made for Pirate Software Game Jam 18. All code is original. Music and SFX used under their respective licenses (see Credits).
