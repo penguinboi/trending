@@ -140,11 +140,11 @@ The player must decide: verify to make informed decisions, or act quickly on ins
 
 Players choose a difficulty mode before starting:
 
-| Mode | Speed | Starting Stability | Backlash | Description |
-|------|-------|-------------------|----------|-------------|
-| Chill | 0.75x | 120% | Flat (-1) | Relaxed pace, forgiving penalties, extra stability |
-| Normal | 1.0x | 100% | Escalating | Balanced pace, standard penalties, the intended experience |
-| Chaos | 1.3x | 80% | 2x Escalating | Overwhelming pace, harsh penalties, good luck |
+| Mode | Speed | Starting Stability | Backlash | Music Speed | Description |
+|------|-------|--------------------|----------|-------------|-------------|
+| Chill | 0.5x | 150% | Flat (-1) | 0.7x | Half speed, forgiving penalties, extra stability |
+| Normal | 1.0x | 100% | Escalating | 0.9x | Balanced pace, standard penalties, the intended experience |
+| Chaos | 1.6x | 60% | 3x Escalating | 1.1x | Blazing speed, brutal penalties, minimal stability |
 
 * Difficulty selection appears after reading the intro paragraphs
 * Selected mode is highlighted with a yellow border
@@ -159,7 +159,7 @@ Players choose a difficulty mode before starting:
 * Suppressing legitimate content causes backlash (severity depends on difficulty mode):
   * **Chill:** Flat -1 per mistake (forgiving)
   * **Normal:** Escalating -1, -2, -3... per consecutive mistake
-  * **Chaos:** Escalating -2, -4, -6... per consecutive mistake (2x multiplier)
+  * **Chaos:** Escalating -3, -6, -9... per consecutive mistake (3x multiplier)
 
 * Backlash represents public distrust of platform censorship
 
@@ -243,7 +243,13 @@ Win if:
 
 * Large action buttons centered horizontally above the belt (170x76 pixels)
 
-* Suppressed posts are greyed out
+* Suppressed posts are greyed out and unselectable
+
+* When a post is promoted by the player, the other post in the pair is greyed out and unselectable
+
+* Promoted posts become unselectable after promotion
+
+* Suppressed posts cannot be verified
 
 * Selected post highlight: thick yellow border (10px)
 
@@ -282,7 +288,7 @@ Win if:
 
 * Intro music: Loops on title screen, stops when game starts
 
-* Background music: "Switch With Me Theme" starts at 80% speed, increases 10% each loop to build tension
+* Background music: "Switch With Me Theme" starts at difficulty-dependent speed (Chill 0.7x, Normal 0.9x, Chaos 1.1x), increases 10% each loop to build tension
 
 * Game over music: Different tracks for collapse vs victory outcomes
 

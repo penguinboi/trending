@@ -36,15 +36,15 @@ const PHASE_SPEEDS = [24, 36, 52, 72, 96, 124, 156, 192, 232, 280];
 
 // Difficulty modes (verifyTime is 2000ms for all modes to match the 2-second sound effect)
 const DIFFICULTY_MODES = {
-    chill:  { name: 'Chill',  speedMult: 0.75, startStability: 120, verifyTime: 2000, backlashFlat: true,  backlashMult: 1 },
-    normal: { name: 'Normal', speedMult: 1.0,  startStability: 100, verifyTime: 2000, backlashFlat: false, backlashMult: 1 },
-    chaos:  { name: 'Chaos',  speedMult: 1.3,  startStability: 80,  verifyTime: 2000, backlashFlat: false, backlashMult: 2 }
+    chill:  { name: 'Chill',  speedMult: 0.5, startStability: 150, verifyTime: 2000, backlashFlat: true,  backlashMult: 1 },
+    normal: { name: 'Normal', speedMult: 1.0, startStability: 100, verifyTime: 2000, backlashFlat: false, backlashMult: 1 },
+    chaos:  { name: 'Chaos',  speedMult: 1.6, startStability: 60,  verifyTime: 2000, backlashFlat: false, backlashMult: 3 }
 };
 
 const DIFFICULTY_DESCRIPTIONS = {
-    chill:  'Relaxed pace • Forgiving penalties • Extra stability',
-    normal: 'Balanced pace • Standard penalties • The intended experience',
-    chaos:  'Overwhelming pace • Harsh penalties • Good luck'
+    chill:  'Half speed • Flat penalties • 150% stability',
+    normal: 'Balanced pace • Escalating penalties • 100% stability',
+    chaos:  'Blazing speed • Brutal penalties • Only 60% stability'
 };
 
 let currentDifficulty = 'normal';
@@ -924,7 +924,7 @@ function update(time, delta) {
 
     // Update UI
     engagementText.setText('📈 User Engagement - ' + Math.floor(engagement).toLocaleString());
-    stabilityText.setText('⚖️ Global Stability - ' + Math.floor(stability) + '%');
+    stabilityText.setText('⚖️ Global Stability - ' + Math.floor(stability) + ' / ' + getDifficulty().startStability + '%');
     phaseText.setText('🎯 Phase - ' + (currentPhase + 1) + ' / 10');
 
     // Update timer (countdown from 10:00)
@@ -1121,6 +1121,7 @@ function createPostCard(scene, x, y, post, label) {
     hitbox.on('pointerdown', () => selectPost(post, container, bgGraphics, hitbox));
     hitbox.on('pointerover', () => {
         if (container.resolved) return; // Don't show hover on resolved cards
+        if (selectedPost && selectedPost.post === post) return; // Don't override selection highlight
         bgGraphics.clear();
         // Shadow
         bgGraphics.fillStyle(0x000000, 0.3);
@@ -1323,6 +1324,7 @@ function handleAction(action) {
             console.log('AFTER - Engagement:', engagement, 'Stability:', stability);
             pair.resolved = true;
             container.resolved = true;
+            container.hitbox.disableInteractive();
             flashCard(container, 0x00ff88);
             // Add large up arrow over the post
             const checkSign = container.scene.add.text(0, 0, '⬆️', {
@@ -1330,6 +1332,11 @@ function handleAction(action) {
                 padding: { left: 20, right: 20, top: 20, bottom: 20 }
             }).setOrigin(0.5);
             container.add(checkSign);
+            // Grey out the other post in the pair
+            const otherCard = pair.postA === post ? pair.cardB : pair.cardA;
+            otherCard.resolved = true;
+            redrawCard(otherCard.bg, otherCard.cardWidth, otherCard.cardHeight, otherCard.cornerRadius, 0x666666, false);
+            otherCard.hitbox.disableInteractive();
             updateFeed(post, postLabel, 'YOU', stabEffect, engEffect, originalStab);
             // Show message based on outcome
             if (post.isFakeNews) {
@@ -1371,8 +1378,9 @@ function handleAction(action) {
             // Mark post as suppressed (algorithm will choose the other post)
             post.suppressed = true;
             container.resolved = true;
-            // Grey out the suppressed card
+            // Grey out the suppressed card and disable selection
             redrawCard(container.bg, container.cardWidth, container.cardHeight, container.cornerRadius, 0x666666, false);
+            container.hitbox.disableInteractive();
             // Add large NO sign over the post
             const noSign = container.scene.add.text(0, 0, '🚫', {
                 fontSize: '80px',
@@ -1403,7 +1411,7 @@ function handleAction(action) {
 
         case 'verify':
             // Start verification timer (takes real time)
-            if (!verifyingPost && !post.verified) {
+            if (!verifyingPost && !post.verified && !post.suppressed) {
                 // Play verify sound
                 currentScene.sound.play('verify', { volume: 0.4 });
                 verifyingPost = { post, container, pair };
@@ -1418,7 +1426,7 @@ function handleAction(action) {
     }
 
     // Clamp stability
-    stability = Math.max(0, Math.min(100, stability));
+    stability = Math.max(0, Math.min(getDifficulty().startStability, stability));
 
     // Clear selection (except during verify)
     if (action !== 'verify') {
@@ -1491,7 +1499,7 @@ function algorithmDecides(pair) {
     console.log('AFTER - Engagement:', engagement, 'Stability:', stability);
 
     // Clamp stability
-    stability = Math.max(0, Math.min(100, stability));
+    stability = Math.max(0, Math.min(getDifficulty().startStability, stability));
 
     // Update feed display
     updateFeed(chosen, chosenLabel, 'ALGORITHM', stabEffect, chosen.engagement, originalStab);
@@ -1589,7 +1597,7 @@ function triggerGameOver(title, reason) {
     gameOverText.setText(title);
     gameOverText.setFill(title === 'TERM COMPLETED' ? '#00ff88' : '#ff4444');
     gameOverSubtext.setText(reason);
-    finalStatsText.setText(`Difficulty: ${getDifficulty().name}\nFinal Engagement: ${Math.floor(engagement).toLocaleString()}\nFinal Stability: ${Math.floor(stability)}%\nPhase Reached: ${currentPhase + 1}/10`);
+    finalStatsText.setText(`Difficulty: ${getDifficulty().name}\nFinal Engagement: ${Math.floor(engagement).toLocaleString()}\nFinal Stability: ${Math.floor(stability)} / ${getDifficulty().startStability}%\nPhase Reached: ${currentPhase + 1}/10`);
 
     gameOverOverlay.setVisible(true);
 }
@@ -1647,13 +1655,14 @@ function startGame() {
     // Initialize difficulty-dependent values
     stability = getDifficulty().startStability;
     beltSpeed = PHASE_SPEEDS[0] * getDifficulty().speedMult;
-    stabilityText.setText('⚖️ Global Stability - ' + stability + '%');
+    stabilityText.setText('⚖️ Global Stability - ' + stability + ' / ' + stability + '%');
     // Stop intro music
     if (introMusic) {
         introMusic.stop();
     }
-    // Start background music at 80% speed, speeds up 10% each loop
-    musicRate = 0.8;
+    // Start background music speed scaled by difficulty
+    const musicRates = { chill: 0.7, normal: 0.9, chaos: 1.1 };
+    musicRate = musicRates[currentDifficulty];
     bgMusic = currentScene.sound.add('music', { volume: 0.5 });
     bgMusic.on('complete', () => {
         musicRate *= 1.1;
@@ -1712,7 +1721,7 @@ function resetGame() {
 
     // Reset UI
     engagementText.setText('📈 User Engagement - 0');
-    stabilityText.setText('⚖️ Global Stability - ' + getDifficulty().startStability + '%');
+    stabilityText.setText('⚖️ Global Stability - ' + getDifficulty().startStability + ' / ' + getDifficulty().startStability + '%');
     stabilityText.setFill('#228833');
     phaseText.setText('🎯 Phase - 1 / 10');
     timerText.setText('⏱️ Time Left - 10:00');

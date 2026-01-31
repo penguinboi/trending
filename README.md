@@ -27,11 +27,11 @@ If you don't act, the algorithm decides for you - and it always chooses maximum 
 
 Choose your challenge level before starting:
 
-| Mode | Speed | Start Stability | Backlash |
-|------|-------|-----------------|----------|
-| 🌴 Chill | 0.75x | 120% | Flat (-1 per mistake) |
-| ⚖️ Normal | 1.0x | 100% | Escalating (-1, -2, -3...) |
-| 🔥 Chaos | 1.3x | 80% | 2x Escalating (-2, -4, -6...) |
+| Mode | Speed | Start Stability | Backlash | Music |
+|------|-------|-----------------|----------|-------|
+| 🌴 Chill | 0.5x | 150% | Flat (-1 per mistake) | 0.7x |
+| ⚖️ Normal | 1.0x | 100% | Escalating (-1, -2, -3...) | 0.9x |
+| 🔥 Chaos | 1.6x | 60% | 3x Escalating (-3, -6, -9...) | 1.1x |
 
 **Chill** is great for learning. **Normal** is the intended experience. **Chaos** is for masochists.
 
